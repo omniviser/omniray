@@ -1,0 +1,40 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: |
+          uv pip install ruff mypy --system
+          cd packages/omniwrap && uv pip install -e . --system && cd ..
+          cd packages/omniray && uv pip install -e ".[otel]" --system
+
+      - name: Ruff check
+        run: ruff check packages/
+
+      - name: Ruff format
+        run: ruff format --check packages/
+
+      - name: MyPy omniwrap
+        run: mypy packages/omniwrap/omniwrap/
+
+      - name: MyPy omniray
+        run: mypy packages/omniray/omniray/

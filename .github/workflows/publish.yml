@@ -1,0 +1,60 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  id-token: write
+
+jobs:
+  publish-omniwrap:
+    runs-on: ubuntu-latest
+    environment: pypi
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install build tools
+        run: pip install build hatch-vcs
+
+      - name: Build omniwrap
+        run: python -m build packages/omniwrap/
+
+      - name: Publish omniwrap to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/omniwrap/dist/
+
+  publish-omniray:
+    runs-on: ubuntu-latest
+    environment: pypi
+    needs: publish-omniwrap
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install build tools
+        run: pip install build hatch-vcs
+
+      - name: Build omniray
+        run: python -m build packages/omniray/
+
+      - name: Publish omniray to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/omniray/dist/
