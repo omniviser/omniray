@@ -1,5 +1,7 @@
 """E2E tests for import filtering — imported functions must NOT be wrapped."""
 
+import os
+
 from omniwrap.wrapper import Wrapper
 
 MODULE_WITH_STDLIB_IMPORTS = """
@@ -38,7 +40,7 @@ def test_stdlib_imports_not_wrapped(create_module, calls, sync_wrapper_factory):
 
     calls.clear()
     result = join("/tmp", "file")
-    assert result == "/tmp/file"
+    assert result == os.path.join("/tmp", "file")  # noqa: PTH118
     assert calls == []
 
 

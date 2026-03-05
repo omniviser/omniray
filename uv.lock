@@ -208,7 +208,7 @@ requires-dist = [
     { name = "opentelemetry-api", marker = "extra == 'otel'", specifier = ">=1.16" },
     { name = "opentelemetry-sdk", marker = "extra == 'dev'", specifier = ">=1.16" },
     { name = "opentelemetry-sdk", marker = "extra == 'otel'", specifier = ">=1.16" },
-    { name = "pydantic", specifier = ">=2.0,<3" },
+    { name = "pydantic", specifier = ">=2.7,<3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.25" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0" },

@@ -9,7 +9,7 @@ from types import ModuleType
 
 import wrapt
 
-MAX_OVERHEAD_NS = 1000
+MAX_OVERHEAD_NS = 5000
 
 
 def _noop_wrapper(wrapped, instance, args, kwargs):  # noqa: ARG001
