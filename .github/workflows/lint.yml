@@ -34,7 +34,7 @@ jobs:
         run: ruff format --check packages/
 
       - name: MyPy omniwrap
-        run: mypy packages/omniwrap/omniwrap/
+        run: cd packages/omniwrap && mypy omniwrap/
 
       - name: MyPy omniray
-        run: mypy packages/omniray/omniray/
+        run: cd packages/omniray && mypy omniray/
