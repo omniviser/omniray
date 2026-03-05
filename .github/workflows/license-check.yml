@@ -24,7 +24,7 @@ jobs:
       - name: Install packages and pip-licenses
         run: |
           uv pip install pip-licenses --system
-          cd packages/omniwrap && uv pip install -e . --system && cd ..
+          cd packages/omniwrap && uv pip install -e . --system && cd ../..
           cd packages/omniray && uv pip install -e . --system
 
       - name: Check licenses
