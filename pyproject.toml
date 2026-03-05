@@ -1,0 +1,76 @@
+[project]
+name = "omniray-workspace"
+version = "0.0.0"
+description = "Development workspace for omniray packages."
+requires-python = ">=3.12"
+dependencies = [
+    "omniwrap",
+    "omniray",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-mock>=3.14",
+    "pytest-asyncio>=0.25",
+    "pytest-cov>=6.0",
+    "pre-commit>=4.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+omniwrap = { workspace = true }
+omniray = { workspace = true }
+
+# TOOLS CONFIG
+# ============
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D105",   # missing docstring in magic method
+    "D107",   # missing docstring in __init__
+    "COM812", # trailing comma — conflicts with ruff format
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S", "ANN", "D", "SLF001", "PLR0913", "INP001"]
+"**/conftest.py" = ["F405"]
+"examples/**" = ["T201", "INP001", "D", "ANN", "ARG001", "E501"]
+"benchmarks/**" = ["T201", "INP001", "D", "ANN", "ARG001"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"unittest.mock".msg = "Use pytest-mock's 'mocker' fixture instead"
+
+[tool.mypy]
+disallow_untyped_defs = true
+namespace_packages = true
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = ["wrapt", "wrapt.*", "colorama", "colorama.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "--durations=10"
+asyncio_mode = "auto"
+markers = ["integration: Integration tests (real filesystem, imports)"]
+
+[tool.coverage.run]
+branch = true
+relative_files = true
+
+[tool.coverage.report]
+fail_under = 100

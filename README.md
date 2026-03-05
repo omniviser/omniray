@@ -1,4 +1,11 @@
-# omniray
+<div align="center">
+
+# 🔬 OMNIRAY
+
+### OMNIVISER X-Ray for Python
+
+**See every function call as a color-coded tree in your terminal.**
+**No manual decorators needed.**
 
 [![Tests](https://github.com/omniviser/omniray/actions/workflows/test.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/test.yml)
 [![Lint](https://github.com/omniviser/omniray/actions/workflows/lint.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/lint.yml)
@@ -7,7 +14,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/omniray)](https://pypi.org/project/omniray/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-**Live tracing for Python** — see every function call as a color-coded tree in your terminal, with optional OpenTelemetry spans. No manual decorators needed.
+</div>
 
 omniray is a monorepo with two packages: **[omniray](#packages)** (live tracing — console tree + OpenTelemetry) powered by **[omniwrap](#packages)** (automatic wrapping engine). One call instruments your entire codebase. Built and battle-tested at [OMNIVISER](https://omniviser.ai).
 

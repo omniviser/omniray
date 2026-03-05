@@ -1,0 +1,175 @@
+"""Tests for span profiler module."""
+
+import pytest
+from colorama import Fore, Style
+from omniray.tracing import profilers
+from omniray.tracing.profilers import SpanProfiler
+
+
+def test_log_span_success(mocker):
+    """Test log_span_success logs correct format with colors."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    duration_ms = 5.5
+    SpanProfiler.log_span_success("test_span", duration_ms, 0)
+
+    mock_logger.info.assert_called_once()
+    call_args = mock_logger.info.call_args[0]
+    assert "test_span" in call_args[-2]
+    assert call_args[3] == duration_ms  # duration_ms passed to format string
+
+
+def test_log_span_failure(mocker):
+    """Test log_span_failure logs correct format."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_failure("test_span", 10.0, 0)
+
+    mock_logger.info.assert_called_once()
+    call_args = mock_logger.info.call_args[0]
+    assert "[FAIL]" in call_args[0]
+
+
+def test_log_section_separator_depth_zero(mocker):
+    """Test log_section_separator logs empty line at depth 0."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_section_separator(0)
+
+    mock_logger.info.assert_called_once_with("")
+
+
+def test_log_section_separator_depth_nonzero(mocker):
+    """Test log_section_separator does nothing at depth > 0."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_section_separator(1)
+
+    mock_logger.info.assert_not_called()
+
+
+def test_get_indent_depth_zero_start():
+    """Test get_indent returns start symbol at depth 0."""
+    result = SpanProfiler.get_indent(0, is_start=True)
+
+    assert result == "┌─ "
+
+
+def test_get_indent_depth_zero_end():
+    """Test get_indent returns end symbol at depth 0."""
+    result = SpanProfiler.get_indent(0, is_start=False)
+
+    assert result == "└─ "
+
+
+def test_get_indent_depth_one_start():
+    """Test get_indent returns correct indent at depth 1 start."""
+    result = SpanProfiler.get_indent(1, is_start=True)
+
+    assert result == "├─ ┌─ "
+
+
+def test_get_indent_depth_one_end():
+    """Test get_indent returns correct indent at depth 1 end."""
+    result = SpanProfiler.get_indent(1, is_start=False)
+
+    assert result == "│  └─ "
+
+
+def test_get_indent_depth_two():
+    """Test get_indent returns correct indent at depth 2."""
+    result = SpanProfiler.get_indent(2, is_start=True)
+
+    assert result == "│  ├─ ┌─ "
+
+
+@pytest.mark.parametrize(
+    ("duration_ms", "expected_color"),
+    [
+        (0.5, Style.DIM),  # < 1ms - fast
+        (5.0, Fore.GREEN),  # < 10ms - normal
+        (50.0, Fore.YELLOW),  # < 100ms - slow
+        (150.0, Fore.RED + Style.BRIGHT),  # >= 100ms - very slow
+    ],
+)
+def test_get_color_for_duration(duration_ms, expected_color):
+    """Test _get_color_for_duration returns correct color for different durations."""
+    result = SpanProfiler._get_color_for_duration(duration_ms)
+
+    assert result == expected_color
+
+
+def test_get_warning_symbol_slow():
+    """Test _get_warning_symbol returns [SLOW] for duration >= 200ms."""
+    result = SpanProfiler._get_warning_symbol(200.0)
+
+    assert result == " [SLOW]"
+
+
+def test_get_warning_symbol_normal():
+    """Test _get_warning_symbol returns empty string for duration < 200ms."""
+    result = SpanProfiler._get_warning_symbol(199.0)
+
+    assert result == ""
+
+
+# --- ASCII fallback tests ---
+
+
+def test_get_indent_ascii_fallback(monkeypatch):
+    """Test get_indent produces ASCII output when constants are patched."""
+    monkeypatch.setattr(profilers, "TOP_START", "+- ")
+    monkeypatch.setattr(profilers, "TOP_END", "\\- ")
+    monkeypatch.setattr(profilers, "PIPE", "|  ")
+    monkeypatch.setattr(profilers, "NEST_START", "|- +- ")
+    monkeypatch.setattr(profilers, "NEST_END", "|  \\- ")
+
+    assert SpanProfiler.get_indent(0, is_start=True) == "+- "
+    assert SpanProfiler.get_indent(0, is_start=False) == "\\- "
+    assert SpanProfiler.get_indent(1, is_start=True) == "|- +- "
+    assert SpanProfiler.get_indent(1, is_start=False) == "|  \\- "
+    assert SpanProfiler.get_indent(2, is_start=True) == "|  |- +- "
+
+
+# --- _resolve_unicode_support tests ---
+
+
+@pytest.mark.parametrize(
+    ("encoding", "expected"),
+    [
+        ("utf-8", True),
+        ("UTF-8", True),
+        ("utf_8", True),
+        ("ascii", False),
+        ("latin-1", False),
+        ("", False),
+    ],
+)
+def test_resolve_unicode_support_auto_detection(monkeypatch, encoding, expected):
+    """Test _resolve_unicode_support auto-detects from stderr encoding."""
+    monkeypatch.delenv("OMNIRAY_LOG_STYLE", raising=False)
+    monkeypatch.setattr("sys.stderr", type("FakeStderr", (), {"encoding": encoding})())
+
+    assert profilers._resolve_unicode_support() is expected
+
+
+def test_resolve_unicode_support_missing_encoding(monkeypatch):
+    """Test _resolve_unicode_support handles stderr without encoding attr."""
+    monkeypatch.delenv("OMNIRAY_LOG_STYLE", raising=False)
+    monkeypatch.setattr("sys.stderr", object())
+
+    assert profilers._resolve_unicode_support() is False
+
+
+@pytest.mark.parametrize(
+    ("style", "expected"),
+    [
+        ("unicode", True),
+        ("ascii", False),
+    ],
+)
+def test_resolve_unicode_support_forced_style(monkeypatch, style, expected):
+    """Test OMNIRAY_LOG_STYLE overrides auto-detection."""
+    monkeypatch.setenv("OMNIRAY_LOG_STYLE", style)
+
+    assert profilers._resolve_unicode_support() is expected

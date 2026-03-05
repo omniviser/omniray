@@ -1,0 +1,57 @@
+[project]
+name = "omniray"
+dynamic = ["version"]
+description = "Function tracing and observability with console output and optional OpenTelemetry."
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+readme = "README.md"
+keywords = ["omniray", "tracing", "observability", "instrumentation", "opentelemetry", "profiling"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Topic :: System :: Monitoring",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+dependencies = [
+    "omniwrap>=1.0.0",
+    "pydantic>=2.7,<3",
+    "colorama>=0.4",
+]
+authors = [
+    { name = "Bartlomiej Flis", email = "Bartekdawidflis@gmail.com" },
+    { name = "OMNIVISER SP. Z O.O.", email = "info@omniviser.ai" },
+]
+
+[project.optional-dependencies]
+otel = ["opentelemetry-api>=1.16", "opentelemetry-sdk>=1.16"]
+dev = [
+    "opentelemetry-api>=1.16",
+    "opentelemetry-sdk>=1.16",
+    "pytest>=8.0",
+    "pytest-mock>=3.14",
+    "pytest-asyncio>=0.25",
+    "pytest-cov>=6.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/omniviser/omniray"
+Repository = "https://github.com/omniviser/omniray"
+Issues = "https://github.com/omniviser/omniray/issues"
+Changelog = "https://github.com/omniviser/omniray/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { root = "../.." }
+fallback-version = "1.0.0"
+
+[tool.hatch.build.targets.wheel]
+packages = ["omniray"]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"

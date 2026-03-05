@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "uv"
+    directory: "/packages/omniwrap"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "uv"
+    directory: "/packages/omniray"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
