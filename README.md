@@ -435,17 +435,6 @@ Both `omniwrap` and `omniray` follow [Semantic Versioning](https://semver.org/sp
 - Internal classes (`Wrapper`, `Tracer`, `ModuleDiscovery`, etc.)
 - Console output format (tree layout, colors, `[SLOW]` thresholds)
 
-### What counts as a breaking change
-
-| Change | Breaking? |
-|--------|-----------|
-| Removing or renaming a public function | Yes |
-| Changing default behavior of `wrap_all()` | Yes |
-| Adding a new optional parameter | No |
-| Adding new environment variables | No |
-| Changing console output format | No |
-| Changing internal module structure | No |
-
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
