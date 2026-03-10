@@ -4,13 +4,25 @@ updates:
     directory: "/packages/omniwrap"
     schedule:
       interval: "weekly"
+    labels:
+      - "chore"
+    commit-message:
+      prefix: "chore"
 
   - package-ecosystem: "uv"
     directory: "/packages/omniray"
     schedule:
       interval: "weekly"
+    labels:
+      - "chore"
+    commit-message:
+      prefix: "chore"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    labels:
+      - "ci"
+    commit-message:
+      prefix: "ci"
