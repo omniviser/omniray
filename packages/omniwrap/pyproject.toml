@@ -6,16 +6,29 @@ requires-python = ">=3.12"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 readme = "README.md"
-keywords = ["wrapping", "monkey-patching", "instrumentation", "tracing", "observability", "wrapt"]
+keywords = [
+    "wrapping", 
+    "monkey-patching", 
+    "instrumentation", 
+    "tracing", 
+    "observability", 
+    "monitoring",   
+    "apm",          
+    "decorator",    
+    "logging"    
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators", 
     "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",          
     "Topic :: Software Development :: Libraries",
     "Topic :: System :: Monitoring",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Natural Language :: English",                 
     "Typing :: Typed",
 ]
 dependencies = ["wrapt>=1.14"]
