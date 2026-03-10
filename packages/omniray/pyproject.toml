@@ -6,15 +6,33 @@ requires-python = ">=3.12"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 readme = "README.md"
-keywords = ["omniray", "tracing", "observability", "instrumentation", "opentelemetry", "profiling"]
+keywords = [
+    "omniray", 
+    "tracing", 
+    "observability", 
+    "instrumentation", 
+    "opentelemetry", 
+    "otel",        
+    "profiling", 
+    "monitoring",
+    "console",     
+    "debugging",  
+    "real-time",   
+    "performance" 
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
     "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
     "Topic :: System :: Monitoring",
+    "Topic :: Software Development :: Debuggers", 
+    "Topic :: Software Development :: Libraries",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Natural Language :: English",
     "Typing :: Typed",
 ]
 dependencies = [
