@@ -24,10 +24,3 @@ jobs:
           artifact-name: sbom-omniray.spdx.json
           output-file: sbom-omniray.spdx.json
           path: packages/omniray/
-
-      - name: Attach SBOMs to release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ github.event.release.tag_name }}
-        run: |
-          gh release upload "$TAG_NAME" sbom-omniwrap.spdx.json sbom-omniray.spdx.json
