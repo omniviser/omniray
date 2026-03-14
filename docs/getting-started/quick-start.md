@@ -2,7 +2,7 @@
 
 ## With omniray (recommended)
 
-Two lines to instrument your entire codebase:
+One call to instrument your entire codebase:
 
 ```python
 from omniwrap import wrap_all

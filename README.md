@@ -2,7 +2,7 @@
 
 # OMNIRAY
 
-**Find your bottleneck in 2 lines of code.**
+**Find your bottleneck in one call.**
 
 [![Tests](https://github.com/omniviser/omniray/actions/workflows/test.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/test.yml)
 [![Lint](https://github.com/omniviser/omniray/actions/workflows/lint.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/lint.yml)
@@ -11,7 +11,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/omniray)](https://pypi.org/project/omniray/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Automatic tracing for Python. See every function call as a live, color-coded tree in your terminal. No decorators, no config files — just two lines of code.
+Automatic tracing for Python. See every function call as a live, color-coded tree in your terminal. No decorators, no config files — just one call.
 
 Built and battle-tested at [OMNIVISER](https://omniviser.ai).
 

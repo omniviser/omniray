@@ -1,8 +1,8 @@
 # omniray
 
-**Find your bottleneck in 2 lines of code.**
+**Find your bottleneck in one call.**
 
-Automatic tracing for Python. See every function call as a live, color-coded tree in your terminal. No decorators, no config files — just two lines of code.
+Automatic tracing for Python. See every function call as a live, color-coded tree in your terminal. No decorators, no config files — just one call.
 
 <!-- TODO: Replace with asciinema/VHS recording -->
 <!-- ![omniray demo](assets/demo.gif) -->
