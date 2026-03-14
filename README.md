@@ -2,11 +2,14 @@
 
 <img src="docs/assets/omniray_logo.png" alt="omniray logo" width="400">
 
+<br>
+
 [![codecov](https://codecov.io/gh/omniviser/omniray/graph/badge.svg)](https://codecov.io/gh/omniviser/omniray)
 [![Tests](https://github.com/omniviser/omniray/actions/workflows/test.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/test.yml)
 [![Lint](https://github.com/omniviser/omniray/actions/workflows/lint.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/lint.yml)
 [![CodeQL](https://github.com/omniviser/omniray/actions/workflows/codeql.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/codeql.yml)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=omniviser_omniray&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=omniviser_omniray)
+<br>
 [![PyPI](https://img.shields.io/pypi/v/omniray)](https://pypi.org/project/omniray/)
 [![Python](https://img.shields.io/pypi/pyversions/omniray)](https://pypi.org/project/omniray/)
 [![Docs](https://github.com/omniviser/omniray/actions/workflows/docs.yml/badge.svg)](https://omniviser.github.io/omniray/)
