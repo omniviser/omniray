@@ -49,7 +49,7 @@ template: |
   ## Contributors
 
   $CONTRIBUTORS
-  
+
 autolabeler:
   - label: 'feat'
     title:

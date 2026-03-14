@@ -16,6 +16,9 @@ dev = [
     "pytest-cov>=6.0",
     "pre-commit>=4.0",
 ]
+docs = [
+    "mkdocs-material>=9.0",
+]
 
 [tool.uv]
 package = false
