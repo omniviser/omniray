@@ -2,7 +2,7 @@
 
 <img src="docs/assets/omniray_logo.png" alt="omniray logo" width="400">
 
-<br>
+<br><br>
 
 [![codecov](https://codecov.io/gh/omniviser/omniray/graph/badge.svg)](https://codecov.io/gh/omniviser/omniray)
 [![Tests](https://github.com/omniviser/omniray/actions/workflows/test.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/test.yml)
