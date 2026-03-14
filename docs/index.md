@@ -7,8 +7,7 @@ Live function, error and I/O tracing in clear logs.<br>
 Full context for you and your AI with negligible overhead.<br>
 No decorators, no config files — just one call.
 
-<!-- TODO: Replace with asciinema/VHS recording -->
-<!-- ![omniray demo](assets/demo.gif) -->
+![omniray demo](assets/demo.gif)
 
 ```
 14:23  INFO: ┌─ AuthMiddleware.__call__

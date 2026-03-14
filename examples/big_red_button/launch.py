@@ -29,14 +29,14 @@ class BigRedButton:
     def __init__(self) -> None:
         self.launcher = MissileLauncher()
 
-    def press(self) -> str:
+    def press(self) -> dict:
         self.pre_launch_check()
         return self.launch_sequence()
 
     def pre_launch_check(self) -> None:
         self.launcher.authenticate("LAUNCH-CODE-7740")
 
-    def launch_sequence(self) -> str:
+    def launch_sequence(self) -> dict:
         self.launcher.arm_warhead()
         self.launcher.select_target("51.5074° N, 0.1278° W")
         return self.launcher.fire()
