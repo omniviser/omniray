@@ -1,0 +1,83 @@
+site_name: OMNIRAY
+site_url: https://omniviser.github.io/omniray/
+site_description: Automatic tracing for Python. Find your bottleneck in 2 lines of code.
+repo_url: https://github.com/omniviser/omniray
+repo_name: omniviser/omniray
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  logo: assets/icon-white-200.png
+  favicon: assets/favicon.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+    - toc.integrate
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - getting-started/index.md
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quick-start.md
+  - Guide:
+      - guide/index.md
+      - "@trace Decorator": guide/trace-decorator.md
+      - Custom Wrappers: guide/custom-wrappers.md
+      - Configuration: guide/configuration.md
+  - Reference:
+      - reference/index.md
+      - API Reference: reference/api.md
+      - Performance: reference/performance.md
+  - Examples:
+      - examples/index.md
+      - Basic Logging: examples/basic-logging.md
+      - Execution Timing: examples/basic-timing.md

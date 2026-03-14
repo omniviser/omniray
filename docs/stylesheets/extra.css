@@ -1,0 +1,27 @@
+/* OMNIVISER brand colors */
+:root {
+  --md-primary-fg-color: #391057;
+  --md-primary-fg-color--light: #4B3B8F;
+  --md-primary-fg-color--dark: #2a0e42;
+  --md-accent-fg-color: #D4AF37;
+  --md-accent-fg-color--transparent: #D4AF3720;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #4B3B8F;
+  --md-primary-fg-color--light: #7A4E9F;
+  --md-primary-fg-color--dark: #391057;
+  --md-accent-fg-color: #D4AF37;
+  --md-accent-fg-color--transparent: #D4AF3720;
+}
+
+/* Logo sizing */
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  height: 1.6rem;
+}
+
+/* Site name - bold */
+.md-header__topic .md-ellipsis {
+  font-weight: 700;
+}
