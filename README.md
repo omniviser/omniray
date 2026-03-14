@@ -1,50 +1,76 @@
 <div align="center">
 
-# OMNIRAY
+<img src="docs/assets/omniray_logo.png" alt="omniray logo" width="400">
 
-**Find your bottleneck in one call.**
+**Stop guessing! Debug effortlessly!**<br>
+**You and your AI can now see anything.**
 
+Meet omniray — OMNIVISER's X-RAY
+
+[![codecov](https://codecov.io/gh/omniviser/omniray/graph/badge.svg)](https://codecov.io/gh/omniviser/omniray)
 [![Tests](https://github.com/omniviser/omniray/actions/workflows/test.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/test.yml)
 [![Lint](https://github.com/omniviser/omniray/actions/workflows/lint.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/lint.yml)
-[![codecov](https://codecov.io/gh/omniviser/omniray/graph/badge.svg)](https://codecov.io/gh/omniviser/omniray)
+[![CodeQL](https://github.com/omniviser/omniray/actions/workflows/codeql.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/codeql.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=omniviser_omniray&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=omniviser_omniray)
 [![PyPI](https://img.shields.io/pypi/v/omniray)](https://pypi.org/project/omniray/)
 [![Python](https://img.shields.io/pypi/pyversions/omniray)](https://pypi.org/project/omniray/)
+[![Docs](https://github.com/omniviser/omniray/actions/workflows/docs.yml/badge.svg)](https://omniviser.github.io/omniray/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Automatic tracing for Python. See every function call as a live, color-coded tree in your terminal. No decorators, no config files — just one call.
+<p>
+• Live <code>function</code>, <code>error</code> and <code>I/O</code> tracing in clear logs.<br>
+• Full context for you and your AI.<br>
+• No decorators, no config files — just one call.<br>
+</p>
 
 Built and battle-tested at [OMNIVISER](https://omniviser.ai).
 
 </div>
 
-<!-- TODO: Replace with asciinema/VHS recording showing colored terminal output -->
-<!-- vhs record demo.tape -o docs/assets/demo.gif -->
-<!--
+---
+
+## Quick Start
+
+> Demo app built to show omniray in action — every function call traced live with timing and I/O.
+
 <p align="center">
   <img src="docs/assets/demo.gif" alt="omniray demo" width="700">
 </p>
--->
+
+```python
+from omniwrap import wrap_all
+from omniray import create_trace_wrapper
+
+wrap_all(create_trace_wrapper())
+```
+
+```bash
+OMNIRAY_LOG=true python app.py
+```
 
 ```
-14:23  INFO: ┌─ AuthMiddleware.__call__
-14:23  INFO: │  ├─ ┌─ TokenService.authenticate
-14:23  INFO: │  │  ├─ ┌─ TokenService._extract_bearer_token
-14:23  INFO: │  │  │  ├─ ┌─ SessionStore.get_token
-14:23  INFO: │  │  │  │  └─ (850.75ms) SessionStore.get_token [SLOW]
-14:23  INFO: │  │  │  └─ (851.25ms) TokenService._extract_bearer_token [SLOW]
-14:23  INFO: │  │  ├─ ┌─ JWTValidator.decode_and_verify
-14:23  INFO: │  │  │  └─ (335.23ms) JWTValidator.decode_and_verify [SLOW]
-14:23  INFO: │  │  ├─ ┌─ PermissionService.check_access
-14:23  INFO: │  │  │  └─ (12.43ms) PermissionService.check_access
-14:23  INFO: │  │  └─ (1200.07ms) TokenService.authenticate [SLOW]
-14:23  INFO: │  ├─ ┌─ OrderView.get
-14:23  INFO: │  │  ├─ ┌─ OrderView.check_permissions
-14:23  INFO: │  │  │  └─ (0.01ms) OrderView.check_permissions
-14:23  INFO: │  │  ├─ ┌─ OrderView.get_context
-14:23  INFO: │  │  │  └─ (0.05ms) OrderView.get_context
-14:23  INFO: │  │  └─ (32.69ms) OrderView.get
-14:23  INFO: │  └─ (1234.08ms) AuthMiddleware.dispatch [SLOW]
-14:23  INFO: └─ (1247.51ms) AuthMiddleware.__call__ [SLOW]
+13:44  INFO: ┌─ BigRedButton.press
+13:44  INFO: ├─ ┌─ BigRedButton.pre_launch_check
+13:44  INFO: │  ├─ ┌─ MissileLauncher.authenticate
+13:44  INFO: │  │  └─ (52.80ms) MissileLauncher.authenticate
+13:44  INFO: │  └─ (53.34ms) BigRedButton.pre_launch_check
+13:44  INFO: ├─ ┌─ BigRedButton.launch_sequence
+13:44  INFO: │  ├─ ┌─ MissileLauncher.arm_warhead
+13:44  INFO: │  │  └─ (124.97ms) MissileLauncher.arm_warhead
+13:44  INFO: │  ├─ ┌─ MissileLauncher.select_target
+13:44  INFO: │  │  IN: {
+13:44  INFO: │  │    "coordinates": "51.5074° N, 0.1278° W"
+13:44  INFO: │  │  }
+13:44  INFO: │  │  └─ (34.74ms) MissileLauncher.select_target
+13:44  INFO: │  ├─ ┌─ MissileLauncher.fire
+13:44  INFO: │  │  └─ (202.05ms) MissileLauncher.fire [SLOW]
+13:44  INFO: │  │  OUT: {
+13:44  INFO: │  │    "status": "BOOM!",
+13:44  INFO: │  │    "impact": true,
+13:44  INFO: │  │    "debris_radius_km": 4.2
+13:44  INFO: │  │  }
+13:44  INFO: │  └─ (363.92ms) BigRedButton.launch_sequence [SLOW]
+13:44  INFO: └─ (418.23ms) BigRedButton.press [SLOW]
 ```
 
 ## Why omniray?
@@ -64,29 +90,14 @@ pip install omniwrap             # wrapping engine only (custom wrappers)
 
 Requires Python >= 3.12. omniray is built on [omniwrap](packages/omniwrap/) — installing omniray installs both.
 
-## Quick Start
-
-```python
-from omniwrap import wrap_all
-from omniray import create_trace_wrapper
-
-wrap_all(create_trace_wrapper())
-```
-
-```bash
-OMNIRAY_LOG=true python app.py
-```
-
-That's it. Every function call in your codebase now appears as a timed, nested tree in your terminal.
-
 ## Features
 
-- **`@trace` decorator** — Per-function control over logging, I/O capture, and OTel spans
-- **I/O logging** — Log function arguments and return values for selected functions
-- **Conditional skip** — Skip tracing for health checks or noisy functions via `skip_if`
-- **Selective OpenTelemetry** — Enable OTel spans on specific functions without global overhead
-- **Custom wrappers** — Build your own wrappers with the omniwrap engine
-- **Configuration** — Control paths, exclusions, and behavior via `pyproject.toml` and env vars
+- **[`@trace` decorator](https://omniviser.github.io/omniray/guide/trace-decorator/)** — Per-function control over logging, I/O capture, and OTel spans
+- **[I/O logging](https://omniviser.github.io/omniray/guide/trace-decorator/#io-logging)** — Log function arguments and return values for selected functions
+- **[Conditional skip](https://omniviser.github.io/omniray/guide/trace-decorator/#conditional-skip)** — Skip tracing for health checks or noisy functions via `skip_if`
+- **[Selective OpenTelemetry](https://omniviser.github.io/omniray/guide/trace-decorator/#selective-opentelemetry)** — Enable OTel spans on specific functions without global overhead
+- **[Custom wrappers](https://omniviser.github.io/omniray/guide/custom-wrappers/)** — Build your own wrappers with the omniwrap engine
+- **[Configuration](https://omniviser.github.io/omniray/guide/configuration/)** — Control paths, exclusions, and behavior via `pyproject.toml` and env vars
 
 ## Performance
 

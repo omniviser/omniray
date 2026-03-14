@@ -1,6 +1,6 @@
 site_name: OMNIRAY
 site_url: https://omniviser.github.io/omniray/
-site_description: Automatic tracing for Python. Find your bottleneck in one call.
+site_description: Automatic tracing for Python. Stop guessing. Debug effortlessly. You and your AI can now see everything.
 repo_url: https://github.com/omniviser/omniray
 repo_name: omniviser/omniray
 edit_uri: edit/main/docs/

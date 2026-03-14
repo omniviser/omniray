@@ -1,8 +1,11 @@
 # omniray
 
-**Find your bottleneck in one call.**
+**Stop guessing. Debug effortlessly.**
+**You and your AI can now see anything. 🚀**
 
-Automatic tracing for Python. See every function call as a live, color-coded tree in your terminal. No decorators, no config files — just one call.
+Live function, error and I/O tracing in clear logs.<br>
+Full context for you and your AI with negligible overhead.<br>
+No decorators, no config files — just one call.
 
 <!-- TODO: Replace with asciinema/VHS recording -->
 <!-- ![omniray demo](assets/demo.gif) -->
