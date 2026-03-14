@@ -114,6 +114,27 @@ Output:
 
 omniray **never wraps**: dunder methods, properties, exception classes, already-wrapped functions, imported objects, functions decorated with `@trace`, or its own package. Exceptions are **never masked** — if your function raises, the exception propagates unchanged.
 
+## Environment Variables
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `OMNIWRAP` | bool | `false` | Enable/disable wrapping when `enabled=None` is passed to `wrap_all()` |
+
+The remaining omniray flags use a **tri-state** system:
+
+- **`true`** — enabled
+- **`false`** — **kill switch** (overrides all decorator parameters, cannot be turned back on per-function)
+- **unset** — local decides (decorator parameters or defaults apply)
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `OMNIRAY_LOG` | bool | unset | Console tree output |
+| `OMNIRAY_LOG_INPUT` | bool | unset | Log function arguments (requires `OMNIRAY_LOG`) |
+| `OMNIRAY_LOG_OUTPUT` | bool | unset | Log function return values (requires `OMNIRAY_LOG`) |
+| `OMNIRAY_LOG_COLOR` | bool | `true` | ANSI colors in console output |
+| `OMNIRAY_LOG_STYLE` | str | `auto` | Box-drawing style: `unicode`, `ascii`, or `auto` |
+| `OMNIRAY_OTEL` | bool | unset | OpenTelemetry span creation |
+
 ## Documentation
 
 **[Read the full docs](https://omniviser.github.io/omniray/)** — configuration, API reference, performance benchmarks, examples, and more.
