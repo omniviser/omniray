@@ -8,11 +8,20 @@
 }
 
 [data-md-color-scheme="slate"] {
-  --md-primary-fg-color: #4B3B8F;
-  --md-primary-fg-color--light: #7A4E9F;
-  --md-primary-fg-color--dark: #391057;
+  --md-primary-fg-color: #391057;
+  --md-primary-fg-color--light: #4B3B8F;
+  --md-primary-fg-color--dark: #2a0e42;
   --md-accent-fg-color: #D4AF37;
   --md-accent-fg-color--transparent: #D4AF3720;
+  --md-typeset-a-color: #9B4DCA;
+}
+
+/* Dark mode: lighter purple for readable body text */
+[data-md-color-scheme="slate"] .md-typeset a {
+  color: #9B4DCA;
+}
+[data-md-color-scheme="slate"] .md-typeset a:hover {
+  color: #B06DD8;
 }
 
 /* Logo sizing */

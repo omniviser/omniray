@@ -26,7 +26,6 @@ theme:
         name: Switch to light mode
   features:
     - navigation.instant
-    - navigation.tabs
     - navigation.sections
     - navigation.indexes
     - navigation.expand
@@ -64,10 +63,7 @@ plugins:
 
 nav:
   - Home: index.md
-  - Getting Started:
-      - getting-started/index.md
-      - Installation: getting-started/installation.md
-      - Quick Start: getting-started/quick-start.md
+  - Getting Started: getting-started/index.md
   - Guide:
       - guide/index.md
       - "@trace Decorator": guide/trace-decorator.md

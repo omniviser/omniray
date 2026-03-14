@@ -2,11 +2,6 @@
 
 <img src="docs/assets/omniray_logo.png" alt="omniray logo" width="400">
 
-**Stop guessing! Debug effortlessly!**<br>
-**You and your AI can now see anything.**
-
-Meet omniray — OMNIVISER's X-RAY
-
 [![codecov](https://codecov.io/gh/omniviser/omniray/graph/badge.svg)](https://codecov.io/gh/omniviser/omniray)
 [![Tests](https://github.com/omniviser/omniray/actions/workflows/test.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/test.yml)
 [![Lint](https://github.com/omniviser/omniray/actions/workflows/lint.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/lint.yml)
@@ -17,11 +12,10 @@ Meet omniray — OMNIVISER's X-RAY
 [![Docs](https://github.com/omniviser/omniray/actions/workflows/docs.yml/badge.svg)](https://omniviser.github.io/omniray/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-<p>
-• Live <code>function</code>, <code>error</code> and <code>I/O</code> tracing in clear logs.<br>
-• Full context for you and your AI.<br>
-• No decorators, no config files — just one call.<br>
-</p>
+**Stop guessing! Debug effortlessly!**<br>
+**You and your AI can now see anything.**
+
+Meet omniray — OMNIVISER's X-RAY
 
 Built and battle-tested at [OMNIVISER](https://omniviser.ai).
 
@@ -29,13 +23,31 @@ Built and battle-tested at [OMNIVISER](https://omniviser.ai).
 
 ---
 
-## Quick Start
+## How it works
 
 > Demo app built to show omniray in action — every function call traced live with timing and I/O.
 
 <p align="center">
   <img src="docs/assets/demo.gif" alt="omniray demo" width="700">
 </p>
+
+- Live `function`, `error`, `I/O` and `performance` tracing in clear logs.
+- Full context for you and your AI.
+- No decorators, no config files — just one call.
+
+## Quick Setup
+
+Install:
+
+```bash
+pip install omniray              # console tracing
+pip install omniray[otel]        # + OpenTelemetry spans
+pip install omniwrap             # wrapping engine only (custom wrappers)
+```
+
+Requires Python >= 3.12. omniray is built on [omniwrap](packages/omniwrap/) — installing omniray installs both.
+
+Add to your code:
 
 ```python
 from omniwrap import wrap_all
@@ -44,9 +56,13 @@ from omniray import create_trace_wrapper
 wrap_all(create_trace_wrapper())
 ```
 
+Run your app:
+
 ```bash
 OMNIRAY_LOG=true python app.py
 ```
+
+Output:
 
 ```
 13:44  INFO: ┌─ BigRedButton.press
@@ -79,16 +95,6 @@ OMNIRAY_LOG=true python app.py
 - **Live call tree** — See the full call hierarchy in your terminal as it happens, with color-coded timing (green/yellow/red) and `[SLOW]` tags on bottlenecks. Unlike cProfile or py-spy, there's no post-mortem step.
 - **OpenTelemetry bridge** — Flip one flag to export spans to Jaeger, Datadog, or any OTel-compatible backend. Cherry-pick which functions get spans.
 - **Production-safe** — Never masks exceptions, never wraps dunders or properties, skips already-wrapped functions. Designed to be safe even if accidentally left on.
-
-## Installation
-
-```bash
-pip install omniray              # console tracing
-pip install omniray[otel]        # + OpenTelemetry spans
-pip install omniwrap             # wrapping engine only (custom wrappers)
-```
-
-Requires Python >= 3.12. omniray is built on [omniwrap](packages/omniwrap/) — installing omniray installs both.
 
 ## Features
 
