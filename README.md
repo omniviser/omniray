@@ -10,7 +10,7 @@
 <br>
 [![PyPI](https://img.shields.io/pypi/v/omniray)](https://pypi.org/project/omniray/)
 [![Python](https://img.shields.io/pypi/pyversions/omniray)](https://pypi.org/project/omniray/)
-[![Docs](https://github.com/omniviser/omniray/actions/workflows/docs.yml/badge.svg)](https://omniviser.github.io/omniray/)
+[![Docs](https://img.shields.io/badge/docs-blue)](https://omniviser.github.io/omniray/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 **Stop guessing! Debug effortlessly!**<br>
