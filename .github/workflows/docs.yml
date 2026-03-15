@@ -15,4 +15,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
       - uses: astral-sh/setup-uv@v5
-      - run: uv run mkdocs gh-deploy --force
+      - run: uv run --extra docs mkdocs gh-deploy --force
