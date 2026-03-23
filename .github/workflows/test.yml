@@ -46,13 +46,6 @@ jobs:
           cd packages/omniray
           uv run pytest tests/ -v --cov=omniray --cov-report=xml --cov-fail-under=100
 
-      - name: Upload coverage
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
-        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5
-        with:
-          files: packages/omniwrap/coverage.xml,packages/omniray/coverage.xml
-          fail_ci_if_error: false
-
   test-minimum-versions:
     name: Test minimum dependency versions
     runs-on: ubuntu-latest
