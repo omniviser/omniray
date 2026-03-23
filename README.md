@@ -2,7 +2,7 @@
 
 <img src="docs/assets/omniray_logo.png" alt="omniray logo" width="400"><br><br>
 
-[![codecov](https://codecov.io/gh/omniviser/omniray/graph/badge.svg)](https://codecov.io/gh/omniviser/omniray)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=omniviser_omniray&metric=coverage)](https://sonarcloud.io/summary/new_code?id=omniviser_omniray)
 [![Tests](https://github.com/omniviser/omniray/actions/workflows/test.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/test.yml)
 [![Lint](https://github.com/omniviser/omniray/actions/workflows/lint.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/lint.yml)
 [![CodeQL](https://github.com/omniviser/omniray/actions/workflows/codeql.yml/badge.svg)](https://github.com/omniviser/omniray/actions/workflows/codeql.yml)
