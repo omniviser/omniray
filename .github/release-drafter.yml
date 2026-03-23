@@ -1,7 +1,17 @@
 name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
 
+template: |
+  ## Changes
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
 categories:
+  - title: "Breaking"
+    labels:
+      - "major"
   - title: "Features"
     labels:
       - "feat"
@@ -12,18 +22,43 @@ categories:
       - "fix"
       - "bugfix"
       - "bug"
+  - title: "CI/CD"
+    labels:
+      - "ci"
   - title: "Documentation"
     labels:
-      - "documentation"
       - "docs"
+      - "documentation"
   - title: "Maintenance"
     labels:
       - "chore"
+  - title: "Other changes"
+  - title: "Dependencies"
+    labels:
       - "dependencies"
-      - "ci"
+    collapse-after: 5
 
-change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
-change-title-escapes: '\<*_&'
+autolabeler:
+  - label: "feat"
+    title:
+      - '/^feat(\(.*\))?:/i'
+  - label: "fix"
+    title:
+      - '/^fix(\(.*\))?:/i'
+  - label: "ci"
+    title:
+      - '/^ci(\(.*\))?:/i'
+    files:
+      - ".github/**"
+  - label: "docs"
+    title:
+      - '/^docs(\(.*\))?:/i'
+    files:
+      - "docs/**"
+      - "README.md"
+  - label: "chore"
+    title:
+      - '/^chore(\(.*\))?:/i'
 
 version-resolver:
   major:
@@ -32,34 +67,20 @@ version-resolver:
   minor:
     labels:
       - "feat"
-      - "minor"
       - "feature"
   patch:
     labels:
-      - "patch"
       - "fix"
       - "bugfix"
+      - "bug"
+      - "chore"
+      - "ci"
+      - "docs"
+      - "dependencies"
   default: patch
 
-template: |
-  ## Changes
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+change-title-escapes: '\<*_&'
 
-  $CHANGES
-
-  ## Contributors
-
-  $CONTRIBUTORS
-
-autolabeler:
-  - label: 'feat'
-    title:
-      - '/^feat(\(.*\))?:/i'
-  - label: 'fix'
-    title:
-      - '/^fix(\(.*\))?:/i'
-  - label: 'docs'
-    title:
-      - '/^docs(\(.*\))?:/i'
-  - label: 'chore'
-    title:
-      - '/^chore(\(.*\))?:/i'
+exclude-labels:
+  - "skip-changelog"
