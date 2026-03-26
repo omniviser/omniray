@@ -104,7 +104,7 @@ async def test_trace_async_otel_true_when_global_none(mocker):
     result = await AsyncTracer.trace(async_func, (), {}, otel=True)
 
     assert result == "result"
-    mock_tracer.start_as_current_span.assert_called_once()
+    mock_tracer.start_span.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -119,7 +119,7 @@ async def test_trace_async_otel_false_overrides_global_true(mocker):
     result = await AsyncTracer.trace(async_func, (), {}, otel=False)
 
     assert result == "result"
-    mock_tracer.start_as_current_span.assert_not_called()
+    mock_tracer.start_span.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -134,4 +134,4 @@ async def test_trace_async_otel_none_follows_global_true(mocker):
     result = await AsyncTracer.trace(async_func, (), {}, otel=None)
 
     assert result == "result"
-    mock_tracer.start_as_current_span.assert_called_once()
+    mock_tracer.start_span.assert_called_once()

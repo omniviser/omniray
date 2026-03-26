@@ -233,9 +233,8 @@ class AsyncTracer(Tracer):
         try:
             if flags.otel and not HAS_OTEL:
                 raise ImportError(OTEL_MISSING_MSG)
-            # otel_tracer is guaranteed non-None here — guarded by flags.otel + HAS_OTEL check above
-            context = otel_tracer.start_as_current_span(span_name) if flags.otel else NOOP_CONTEXT  # type: ignore[union-attr]
-            with context as span:  # type: ignore[union-attr]
+            span, token = cls._enter_otel_span(span_name, flags)
+            try:
                 start_time = cls._init_tracing(span, current_depth)
                 duration_s = 0.0
                 try:
@@ -258,5 +257,31 @@ class AsyncTracer(Tracer):
                         cls._trace_duration(span, duration_s)
                     except Exception:  # noqa: BLE001, S110
                         pass
+            finally:
+                cls._exit_otel_span(span, token, flags)
         finally:
             _call_depth.set(current_depth)
+
+    @staticmethod
+    def _enter_otel_span(span_name: str, flags: TraceFlags) -> tuple:
+        """Start an OTel span with explicit attach — no generator, safe for async GC."""
+        if not flags.otel:
+            return None, None
+        from opentelemetry import context as context_api  # noqa: PLC0415
+        from opentelemetry import trace as trace_api  # noqa: PLC0415
+
+        # otel_tracer guaranteed non-None: guarded by flags.otel + HAS_OTEL
+        span = otel_tracer.start_span(span_name)  # type: ignore[union-attr]
+        ctx = trace_api.set_span_in_context(span)
+        token = context_api.attach(ctx)
+        return span, token
+
+    @staticmethod
+    def _exit_otel_span(span: OtelSpan | None, token: object | None, flags: TraceFlags) -> None:
+        """Detach context and end span. Counterpart to :meth:`_enter_otel_span`."""
+        if not flags.otel:
+            return
+        from opentelemetry import context as context_api  # noqa: PLC0415
+
+        context_api.detach(token)  # type: ignore[arg-type]  # Token[Context] stored as object
+        span.end()  # type: ignore[union-attr]
