@@ -3,17 +3,29 @@
 import pytest
 from omniwrap.config import DiscoveryConfig
 
-SYNC_SOURCE = """
+
+@pytest.fixture
+def sync_source():
+    """Python source with a sync function."""
+    return """
 def greet(name):
     return f"Hello {name}"
 """
 
-ASYNC_SOURCE = """
+
+@pytest.fixture
+def async_source():
+    """Python source with an async function."""
+    return """
 async def fetch(url):
     return f"Fetched {url}"
 """
 
-MIXED_SOURCE = """
+
+@pytest.fixture
+def mixed_source():
+    """Python source with both sync and async functions."""
+    return """
 def greet(name):
     return f"Hello {name}"
 
