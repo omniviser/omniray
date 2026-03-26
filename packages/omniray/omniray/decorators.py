@@ -5,7 +5,7 @@ This module provides:
 - create_trace_wrapper() factory for automatic instrumentation with omniwrap
 """
 
-import asyncio
+import inspect
 from collections.abc import Callable
 from functools import wraps
 
@@ -51,7 +51,7 @@ def trace[**P, T](
     """
 
     def decorator(func: Callable[P, T]) -> Callable[P, T]:
-        if asyncio.iscoroutinefunction(func):
+        if inspect.iscoroutinefunction(func):
 
             @wraps(func)
             async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> CallResult:

@@ -4,7 +4,6 @@ import asyncio
 
 import pytest
 from omniwrap.wrapper import Wrapper
-from tests.e2e.conftest import ASYNC_SOURCE, SYNC_SOURCE
 
 CLASS_SOURCE = """
 class Service:
@@ -24,9 +23,11 @@ class Service:
 """
 
 
-def test_duplicate_wrap_all_does_not_double_wrap_sync(create_module, calls, sync_wrapper_factory):
+def test_duplicate_wrap_all_does_not_double_wrap_sync(
+    create_module, calls, sync_wrapper_factory, sync_source
+):
     """Calling wrap_all() twice with the same wrapper should NOT double-wrap."""
-    config = create_module(SYNC_SOURCE)
+    config = create_module(sync_source)
     wrapper = sync_wrapper_factory("w")
 
     Wrapper.wrap_all(wrapper, config=config)
@@ -39,9 +40,11 @@ def test_duplicate_wrap_all_does_not_double_wrap_sync(create_module, calls, sync
     assert calls == ["w_before", "w_after"]
 
 
-def test_duplicate_wrap_all_does_not_double_wrap_async(create_module, calls, async_wrapper_factory):
+def test_duplicate_wrap_all_does_not_double_wrap_async(
+    create_module, calls, async_wrapper_factory, async_source
+):
     """Calling wrap_all() twice should NOT double-wrap async functions."""
-    config = create_module(ASYNC_SOURCE)
+    config = create_module(async_source)
     wrapper = async_wrapper_factory("w")
 
     Wrapper.wrap_all(wrapper, config=config)
@@ -54,9 +57,11 @@ def test_duplicate_wrap_all_does_not_double_wrap_async(create_module, calls, asy
     assert calls == ["w_before", "w_after"]
 
 
-def test_different_wrap_all_calls_do_not_stack(create_module, calls, sync_wrapper_factory):
+def test_different_wrap_all_calls_do_not_stack(
+    create_module, calls, sync_wrapper_factory, sync_source
+):
     """Two separate wrap_all() calls with different wrappers — second is ignored."""
-    config = create_module(SYNC_SOURCE)
+    config = create_module(sync_source)
 
     Wrapper.wrap_all(sync_wrapper_factory("first"), config=config)
     Wrapper.wrap_all(sync_wrapper_factory("second"), config=config)
@@ -76,10 +81,10 @@ def test_different_wrap_all_calls_do_not_stack(create_module, calls, sync_wrappe
     ],
 )
 def test_single_call_with_multiple_wrappers_then_duplicate_call(
-    create_module, calls, sync_wrapper_factory, wrapper_count
+    create_module, calls, sync_wrapper_factory, wrapper_count, sync_source
 ):
     """wrap_all(w1, w2) then wrap_all(w3) — w3 should be ignored."""
-    config = create_module(SYNC_SOURCE)
+    config = create_module(sync_source)
     labels = ["a", "b", "c"][:wrapper_count]
     wrappers = [sync_wrapper_factory(label) for label in labels]
 
