@@ -79,6 +79,40 @@ def test_log_span_success_zero_size_renders(mocker):
     assert "out: %.2fMB" in fmt
 
 
+def test_log_span_success_big_tag_appears_when_output_exceeds(mocker, monkeypatch):
+    """output size over threshold → final positional arg contains ' [BIG]'."""
+    monkeypatch.setattr(profilers, "_SIZE_WARNING_MB", 1.0)
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success("test_span", 5.5, 0, output_size_mb=2.0)
+
+    trailing = mock_logger.info.call_args[0][-1]
+    assert " [BIG]" in trailing
+    assert "[SLOW]" not in trailing
+
+
+def test_log_span_success_both_slow_and_big_tags(mocker, monkeypatch):
+    """Duration >= 200ms AND size >= threshold → trailing has ' [SLOW] [BIG]'."""
+    monkeypatch.setattr(profilers, "_SIZE_WARNING_MB", 10.0)
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success("test_span", 500.0, 0, output_size_mb=50.0)
+
+    trailing = mock_logger.info.call_args[0][-1]
+    assert trailing == " [SLOW] [BIG]"
+
+
+def test_log_span_success_no_big_tag_when_sizes_none(mocker, monkeypatch):
+    """No size kwargs → no [BIG] (backward-compat preserved regardless of threshold)."""
+    monkeypatch.setattr(profilers, "_SIZE_WARNING_MB", 0.0001)
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success("test_span", 5.5, 0)
+
+    trailing = mock_logger.info.call_args[0][-1]
+    assert "[BIG]" not in trailing
+
+
 def test_log_span_failure(mocker):
     """Test log_span_failure logs correct format."""
     mock_logger = mocker.patch("omniray.tracing.profilers.logger")
@@ -171,6 +205,53 @@ def test_get_warning_symbol_normal():
     result = SpanProfiler._get_warning_symbol(199.0)
 
     assert result == ""
+
+
+# --- _get_size_warning_symbol / _read_size_warning_threshold ---
+
+
+def test_get_size_warning_symbol_both_none_returns_empty():
+    assert SpanProfiler._get_size_warning_symbol(None, None) == ""
+
+
+def test_get_size_warning_symbol_below_threshold_returns_empty(monkeypatch):
+    monkeypatch.setattr(profilers, "_SIZE_WARNING_MB", 10.0)
+    assert SpanProfiler._get_size_warning_symbol(5.0, 8.0) == ""
+
+
+def test_get_size_warning_symbol_input_above_threshold(monkeypatch):
+    monkeypatch.setattr(profilers, "_SIZE_WARNING_MB", 10.0)
+    assert SpanProfiler._get_size_warning_symbol(15.0, 1.0) == " [BIG]"
+
+
+def test_get_size_warning_symbol_output_above_threshold(monkeypatch):
+    monkeypatch.setattr(profilers, "_SIZE_WARNING_MB", 10.0)
+    assert SpanProfiler._get_size_warning_symbol(1.0, 20.0) == " [BIG]"
+
+
+def test_get_size_warning_symbol_threshold_boundary(monkeypatch):
+    monkeypatch.setattr(profilers, "_SIZE_WARNING_MB", 10.0)
+    assert SpanProfiler._get_size_warning_symbol(10.0, None) == " [BIG]"
+
+
+def test_get_size_warning_symbol_none_and_small(monkeypatch):
+    monkeypatch.setattr(profilers, "_SIZE_WARNING_MB", 10.0)
+    assert SpanProfiler._get_size_warning_symbol(None, 0.5) == ""
+
+
+def test_read_size_warning_threshold_default(monkeypatch):
+    monkeypatch.delenv("OMNIRAY_SIZE_WARNING_MB", raising=False)
+    assert profilers._read_size_warning_threshold() == 10.0
+
+
+def test_read_size_warning_threshold_custom(monkeypatch):
+    monkeypatch.setenv("OMNIRAY_SIZE_WARNING_MB", "5")
+    assert profilers._read_size_warning_threshold() == 5.0
+
+
+def test_read_size_warning_threshold_invalid_falls_back(monkeypatch):
+    monkeypatch.setenv("OMNIRAY_SIZE_WARNING_MB", "abc")
+    assert profilers._read_size_warning_threshold() == 10.0
 
 
 # --- ASCII fallback tests ---

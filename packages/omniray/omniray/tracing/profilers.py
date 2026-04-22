@@ -33,6 +33,23 @@ def _resolve_unicode_support() -> bool:
 
 _USE_UNICODE = _resolve_unicode_support()
 
+
+def _read_size_warning_threshold() -> float:
+    """Parse ``OMNIRAY_SIZE_WARNING_MB`` (default 10.0).
+
+    Invalid values fall back to the default — tracing must never break startup.
+    """
+    raw = os.getenv("OMNIRAY_SIZE_WARNING_MB")
+    if raw is None:
+        return 10.0
+    try:
+        return float(raw)
+    except ValueError:
+        return 10.0
+
+
+_SIZE_WARNING_MB = _read_size_warning_threshold()
+
 # Box-drawing characters (unicode vs ASCII fallback)
 TOP_START = "┌─ " if _USE_UNICODE else "+- "
 TOP_END = "└─ " if _USE_UNICODE else "\\- "
@@ -63,7 +80,8 @@ class SpanProfiler:
         indent = cls.get_indent(current_depth, is_start=False)
         color = cls._get_color_for_duration(duration_ms)
         reset = Style.RESET_ALL
-        warning = cls._get_warning_symbol(duration_ms)
+        slow_warning = cls._get_warning_symbol(duration_ms)
+        size_warning = cls._get_size_warning_symbol(input_size_mb, output_size_mb)
         segments = ["%s%s(%.2fms"]
         values: list[object] = [indent, color, duration_ms]
         if input_size_mb is not None:
@@ -73,7 +91,7 @@ class SpanProfiler:
             segments.append(", out: %.2fMB")
             values.append(output_size_mb)
         segments.append(")%s %s%s")
-        values.extend([reset, span_name, warning])
+        values.extend([reset, span_name, slow_warning + size_warning])
         logger.info("".join(segments), *values)
 
     @classmethod
@@ -116,3 +134,15 @@ class SpanProfiler:
     def _get_warning_symbol(cls, duration_ms: float) -> str:
         """Get warning symbol for slow operations."""
         return " [SLOW]" if duration_ms >= cls._THRESHOLD_WARNING else ""
+
+    @classmethod
+    def _get_size_warning_symbol(
+        cls,
+        input_size_mb: float | None,
+        output_size_mb: float | None,
+    ) -> str:
+        """Return ``" [BIG]"`` when either size crosses the MB threshold."""
+        if input_size_mb is None and output_size_mb is None:
+            return ""
+        biggest = max(input_size_mb or 0.0, output_size_mb or 0.0)
+        return " [BIG]" if biggest >= _SIZE_WARNING_MB else ""
