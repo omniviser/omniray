@@ -39,6 +39,7 @@ dependencies = [
     "omniwrap>=1.0.0",
     "pydantic>=2.7,<3",
     "colorama>=0.4",
+    "pympler>=1.1",
 ]
 authors = [
     { name = "Bartlomiej Flis", email = "Bartekdawidflis@gmail.com" },

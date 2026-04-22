@@ -25,6 +25,8 @@ def resolve_flag(*, global_flag: bool | None, local_flag: bool | None) -> bool:
 CONSOLE_LOG_FLAG = _env_flag("OMNIRAY_LOG")
 LOG_INPUT_FLAG = _env_flag("OMNIRAY_LOG_INPUT")
 LOG_OUTPUT_FLAG = _env_flag("OMNIRAY_LOG_OUTPUT")
+LOG_INPUT_SIZE_FLAG = _env_flag("OMNIRAY_LOG_INPUT_SIZE")
+LOG_OUTPUT_SIZE_FLAG = _env_flag("OMNIRAY_LOG_OUTPUT_SIZE")
 
 
 @dataclass(frozen=True)
@@ -34,17 +36,21 @@ class TraceFlags:
     log: bool
     log_input: bool
     log_output: bool
+    log_input_size: bool
+    log_output_size: bool
     otel: bool
 
 
 _default_flags_cache: dict[bool | None, TraceFlags] = {}
 
 
-def resolve_trace_flags(
+def resolve_trace_flags(  # noqa: PLR0913
     *,
     log: bool | None,
     log_input: bool | None,
     log_output: bool | None,
+    log_input_size: bool | None,
+    log_output_size: bool | None,
     otel: bool | None,
     otel_flag: bool | None,
 ) -> TraceFlags:
@@ -54,25 +60,46 @@ def resolve_trace_flags(
     returns a cached singleton — avoids repeated flag resolution and dataclass
     allocation on every call.
     """
-    if log is None and log_input is None and log_output is None and otel is None:
+    if (
+        log is None
+        and log_input is None
+        and log_output is None
+        and log_input_size is None
+        and log_output_size is None
+        and otel is None
+    ):
         cached = _default_flags_cache.get(otel_flag)
         if cached is not None:
             return cached
         flags = _resolve_all(
-            log=None, log_input=None, log_output=None, otel=None, otel_flag=otel_flag
+            log=None,
+            log_input=None,
+            log_output=None,
+            log_input_size=None,
+            log_output_size=None,
+            otel=None,
+            otel_flag=otel_flag,
         )
         _default_flags_cache[otel_flag] = flags
         return flags
     return _resolve_all(
-        log=log, log_input=log_input, log_output=log_output, otel=otel, otel_flag=otel_flag
+        log=log,
+        log_input=log_input,
+        log_output=log_output,
+        log_input_size=log_input_size,
+        log_output_size=log_output_size,
+        otel=otel,
+        otel_flag=otel_flag,
     )
 
 
-def _resolve_all(
+def _resolve_all(  # noqa: PLR0913
     *,
     log: bool | None,
     log_input: bool | None,
     log_output: bool | None,
+    log_input_size: bool | None,
+    log_output_size: bool | None,
     otel: bool | None,
     otel_flag: bool | None,
 ) -> TraceFlags:
@@ -81,5 +108,12 @@ def _resolve_all(
         log=should_log,
         log_input=resolve_flag(global_flag=LOG_INPUT_FLAG, local_flag=log_input) and should_log,
         log_output=resolve_flag(global_flag=LOG_OUTPUT_FLAG, local_flag=log_output) and should_log,
+        log_input_size=(
+            resolve_flag(global_flag=LOG_INPUT_SIZE_FLAG, local_flag=log_input_size) and should_log
+        ),
+        log_output_size=(
+            resolve_flag(global_flag=LOG_OUTPUT_SIZE_FLAG, local_flag=log_output_size)
+            and should_log
+        ),
         otel=resolve_flag(global_flag=otel_flag, local_flag=otel),
     )

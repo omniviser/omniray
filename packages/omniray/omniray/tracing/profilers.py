@@ -50,21 +50,31 @@ class SpanProfiler:
     _THRESHOLD_WARNING = 200
 
     @classmethod
-    def log_span_success(cls, span_name: str, duration_ms: float, current_depth: int) -> None:
-        """Log span success with colored timing (format: indent + timing + name + warning)."""
+    def log_span_success(
+        cls,
+        span_name: str,
+        duration_ms: float,
+        current_depth: int,
+        *,
+        input_size_mb: float | None = None,
+        output_size_mb: float | None = None,
+    ) -> None:
+        """Log span success with colored timing and optional I/O sizes."""
         indent = cls.get_indent(current_depth, is_start=False)
         color = cls._get_color_for_duration(duration_ms)
         reset = Style.RESET_ALL
         warning = cls._get_warning_symbol(duration_ms)
-        logger.info(
-            "%s%s(%.2fms)%s %s%s",
-            indent,
-            color,
-            duration_ms,
-            reset,
-            span_name,
-            warning,
-        )
+        segments = ["%s%s(%.2fms"]
+        values: list[object] = [indent, color, duration_ms]
+        if input_size_mb is not None:
+            segments.append(", in: %.2fMB")
+            values.append(input_size_mb)
+        if output_size_mb is not None:
+            segments.append(", out: %.2fMB")
+            values.append(output_size_mb)
+        segments.append(")%s %s%s")
+        values.extend([reset, span_name, warning])
+        logger.info("".join(segments), *values)
 
     @classmethod
     def log_span_failure(cls, span_name: str, duration_ms: float, current_depth: int) -> None:

@@ -26,6 +26,7 @@ from omniray.tracing.otel import (
     otel_tracer,
 )
 from omniray.tracing.profilers import SpanProfiler
+from omniray.tracing.sizing import measure_size_mb
 from omniray.tracing.span_name_generator import SpanNameGenerator
 
 if TYPE_CHECKING:
@@ -59,6 +60,8 @@ class Tracer:
         log: bool | None = None,
         log_input: bool | None = None,
         log_output: bool | None = None,
+        log_input_size: bool | None = None,
+        log_output_size: bool | None = None,
         otel: bool | None = None,
     ) -> CallResult:
         """Trace synchronous callable execution.
@@ -71,14 +74,24 @@ class Tracer:
             log: Override global OMNIRAY_LOG per-function.
             log_input: Override global OMNIRAY_LOG_INPUT per-function.
             log_output: Override global OMNIRAY_LOG_OUTPUT per-function.
+            log_input_size: Override global OMNIRAY_LOG_INPUT_SIZE per-function.
+            log_output_size: Override global OMNIRAY_LOG_OUTPUT_SIZE per-function.
             otel: Override global OMNIRAY_OTEL per-function.
         """
         flags = resolve_trace_flags(
-            log=log, log_input=log_input, log_output=log_output, otel=otel, otel_flag=OTEL_FLAG
+            log=log,
+            log_input=log_input,
+            log_output=log_output,
+            log_input_size=log_input_size,
+            log_output_size=log_output_size,
+            otel=otel,
+            otel_flag=OTEL_FLAG,
         )
         if flags.log:
             setup_console_handler()
-        span_name, current_depth = cls._setup_trace(wrapped, args, kwargs, flags, instance=instance)
+        span_name, current_depth, input_size_mb = cls._setup_trace(
+            wrapped, args, kwargs, flags, instance=instance
+        )
         try:
             if flags.otel and not HAS_OTEL:
                 raise ImportError(OTEL_MISSING_MSG)
@@ -100,7 +113,9 @@ class Tracer:
                     raise
                 else:
                     duration_s = time.time() - start_time
-                    cls._finish_tracing(result, span_name, duration_s, current_depth, flags)
+                    cls._finish_tracing(
+                        result, span_name, duration_s, current_depth, flags, input_size_mb
+                    )
                     return result
                 finally:
                     try:  # noqa: SIM105 - tracing must never mask user exceptions
@@ -118,19 +133,27 @@ class Tracer:
         return time.time()
 
     @classmethod
-    def _finish_tracing(
+    def _finish_tracing(  # noqa: PLR0913
         cls,
         result: CallResult,
         span_name: str,
         duration_s: float,
         current_depth: int,
         flags: TraceFlags,
+        input_size_mb: float | None,
     ) -> None:
         """Handle successful trace completion."""
         if not flags.log:
             return
         duration_ms = duration_s * 1000
-        cls.profiler.log_span_success(span_name, duration_ms, current_depth)
+        output_size_mb = measure_size_mb(result) if flags.log_output_size else None
+        cls.profiler.log_span_success(
+            span_name,
+            duration_ms,
+            current_depth,
+            input_size_mb=input_size_mb,
+            output_size_mb=output_size_mb,
+        )
         if flags.log_output:
             cls.io_logger.log_output(result, current_depth)
         cls.profiler.log_section_separator(current_depth)
@@ -161,15 +184,21 @@ class Tracer:
         flags: TraceFlags,
         *,
         instance: WraptInstance = None,
-    ) -> tuple[str, int]:
-        """Setup tracing context before callable execution."""
+    ) -> tuple[str, int, float | None]:
+        """Setup tracing context before callable execution.
+
+        Returns ``(span_name, current_depth, input_size_mb)``. ``input_size_mb`` is
+        measured before *wrapped* runs so mutations inside the call don't skew
+        the reported value; ``None`` when the input-size flag is off.
+        """
         span_name = SpanNameGenerator.generate(wrapped, instance=instance)
         if not flags.log:
-            return span_name, 0
+            return span_name, 0, None
         current_depth = cls._update_depth(span_name)
         if flags.log_input:
             cls.io_logger.log_input(args, kwargs, wrapped, current_depth)
-        return span_name, current_depth
+        input_size_mb = measure_size_mb((args, kwargs)) if flags.log_input_size else None
+        return span_name, current_depth, input_size_mb
 
     @classmethod
     def _update_depth(cls, span_name: str) -> int:
@@ -210,6 +239,8 @@ class AsyncTracer(Tracer):
         log: bool | None = None,
         log_input: bool | None = None,
         log_output: bool | None = None,
+        log_input_size: bool | None = None,
+        log_output_size: bool | None = None,
         otel: bool | None = None,
     ) -> CallResult:
         """Trace asynchronous callable execution.
@@ -222,14 +253,24 @@ class AsyncTracer(Tracer):
             log: Override global OMNIRAY_LOG per-function.
             log_input: Override global OMNIRAY_LOG_INPUT per-function.
             log_output: Override global OMNIRAY_LOG_OUTPUT per-function.
+            log_input_size: Override global OMNIRAY_LOG_INPUT_SIZE per-function.
+            log_output_size: Override global OMNIRAY_LOG_OUTPUT_SIZE per-function.
             otel: Override global OMNIRAY_OTEL per-function.
         """
         flags = resolve_trace_flags(
-            log=log, log_input=log_input, log_output=log_output, otel=otel, otel_flag=OTEL_FLAG
+            log=log,
+            log_input=log_input,
+            log_output=log_output,
+            log_input_size=log_input_size,
+            log_output_size=log_output_size,
+            otel=otel,
+            otel_flag=OTEL_FLAG,
         )
         if flags.log:
             setup_console_handler()
-        span_name, current_depth = cls._setup_trace(wrapped, args, kwargs, flags, instance=instance)
+        span_name, current_depth, input_size_mb = cls._setup_trace(
+            wrapped, args, kwargs, flags, instance=instance
+        )
         try:
             if flags.otel and not HAS_OTEL:
                 raise ImportError(OTEL_MISSING_MSG)
@@ -250,7 +291,9 @@ class AsyncTracer(Tracer):
                     raise
                 else:
                     duration_s = time.time() - start_time
-                    cls._finish_tracing(result, span_name, duration_s, current_depth, flags)
+                    cls._finish_tracing(
+                        result, span_name, duration_s, current_depth, flags, input_size_mb
+                    )
                     return result
                 finally:
                     try:  # noqa: SIM105 - tracing must never mask user exceptions

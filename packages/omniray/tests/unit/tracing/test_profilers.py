@@ -19,6 +19,66 @@ def test_log_span_success(mocker):
     assert call_args[3] == duration_ms  # duration_ms passed to format string
 
 
+def test_log_span_success_no_sizes_unchanged_format(mocker):
+    """Backward-compat: no size kwargs → format contains (%.2fms) only, no 'MB'."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success("test_span", 5.5, 0)
+
+    mock_logger.info.assert_called_once()
+    fmt = mock_logger.info.call_args[0][0]
+    assert "(%.2fms)" in fmt
+    assert "MB" not in fmt
+
+
+def test_log_span_success_with_input_size_only(mocker):
+    """input_size_mb set, output_size_mb None → only 'in: %.2fMB' in format."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success("test_span", 5.5, 0, input_size_mb=0.5)
+
+    mock_logger.info.assert_called_once()
+    fmt = mock_logger.info.call_args[0][0]
+    assert "in: %.2fMB" in fmt
+    assert "out:" not in fmt
+    assert 0.5 in mock_logger.info.call_args[0]
+
+
+def test_log_span_success_with_output_size_only(mocker):
+    """output_size_mb set, input_size_mb None → only 'out: %.2fMB' in format."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success("test_span", 5.5, 0, output_size_mb=1.2)
+
+    mock_logger.info.assert_called_once()
+    fmt = mock_logger.info.call_args[0][0]
+    assert "out: %.2fMB" in fmt
+    assert "in:" not in fmt
+    assert 1.2 in mock_logger.info.call_args[0]
+
+
+def test_log_span_success_with_both_sizes(mocker):
+    """Both sizes → 'in: %.2fMB' comes before 'out: %.2fMB'."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success("test_span", 5.5, 0, input_size_mb=0.5, output_size_mb=1.2)
+
+    fmt = mock_logger.info.call_args[0][0]
+    assert fmt.index("in: %.2fMB") < fmt.index("out: %.2fMB")
+    assert 0.5 in mock_logger.info.call_args[0]
+    assert 1.2 in mock_logger.info.call_args[0]
+
+
+def test_log_span_success_zero_size_renders(mocker):
+    """output_size_mb=0.0 still renders segment (distinguishes from None)."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success("test_span", 5.5, 0, output_size_mb=0.0)
+
+    fmt = mock_logger.info.call_args[0][0]
+    assert "out: %.2fMB" in fmt
+
+
 def test_log_span_failure(mocker):
     """Test log_span_failure logs correct format."""
     mock_logger = mocker.patch("omniray.tracing.profilers.logger")

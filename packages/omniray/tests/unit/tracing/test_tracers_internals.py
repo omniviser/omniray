@@ -26,9 +26,16 @@ def _setup_trace_helper():
 
 def test_setup_trace_logging_disabled():
     """Test _setup_trace returns span name but zero depth when log=False."""
-    flags = TraceFlags(log=False, log_input=True, log_output=False, otel=False)
+    flags = TraceFlags(
+        log=False,
+        log_input=True,
+        log_output=False,
+        log_input_size=False,
+        log_output_size=False,
+        otel=False,
+    )
 
-    span_name, depth = Tracer._setup_trace(_setup_trace_helper, (), {}, flags)
+    span_name, depth, _ = Tracer._setup_trace(_setup_trace_helper, (), {}, flags)
 
     # Span name is always generated for Azure Application Insights
     assert span_name == "_setup_trace_helper"
@@ -41,9 +48,16 @@ def test_setup_trace_logging_enabled(mocker):
     mock_io_logger = mocker.patch.object(Tracer, "io_logger")
     mock_call_depth = mocker.patch("omniray.tracing.tracers._call_depth")
     mock_call_depth.get.return_value = 0
-    flags = TraceFlags(log=True, log_input=True, log_output=False, otel=False)
+    flags = TraceFlags(
+        log=True,
+        log_input=True,
+        log_output=False,
+        log_input_size=False,
+        log_output_size=False,
+        otel=False,
+    )
 
-    span_name, depth = Tracer._setup_trace(_setup_trace_helper, (), {}, flags)
+    span_name, depth, _ = Tracer._setup_trace(_setup_trace_helper, (), {}, flags)
 
     assert span_name == "_setup_trace_helper"
     assert depth == 0
@@ -56,7 +70,14 @@ def test_setup_trace_no_input_logging(mocker):
     mock_io_logger = mocker.patch.object(Tracer, "io_logger")
     mock_call_depth = mocker.patch("omniray.tracing.tracers._call_depth")
     mock_call_depth.get.return_value = 0
-    flags = TraceFlags(log=True, log_input=False, log_output=False, otel=False)
+    flags = TraceFlags(
+        log=True,
+        log_input=False,
+        log_output=False,
+        log_input_size=False,
+        log_output_size=False,
+        otel=False,
+    )
 
     def test_func():
         return None
@@ -72,9 +93,16 @@ def test_setup_trace_no_input_logging(mocker):
 def test_finish_tracing_logging_disabled(mocker):
     """Test _finish_tracing does nothing when log=False."""
     mock_profiler = mocker.patch.object(Tracer, "profiler")
-    flags = TraceFlags(log=False, log_input=True, log_output=True, otel=False)
+    flags = TraceFlags(
+        log=False,
+        log_input=True,
+        log_output=True,
+        log_input_size=False,
+        log_output_size=False,
+        otel=False,
+    )
 
-    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags)
+    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags, None)
 
     mock_profiler.log_span_success.assert_not_called()
 
@@ -83,11 +111,20 @@ def test_finish_tracing_logging_enabled(mocker):
     """Test _finish_tracing logs when log=True."""
     mock_profiler = mocker.patch.object(Tracer, "profiler")
     mock_io_logger = mocker.patch.object(Tracer, "io_logger")
-    flags = TraceFlags(log=True, log_input=False, log_output=True, otel=False)
+    flags = TraceFlags(
+        log=True,
+        log_input=False,
+        log_output=True,
+        log_input_size=False,
+        log_output_size=False,
+        otel=False,
+    )
 
-    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags)
+    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags, None)
 
-    mock_profiler.log_span_success.assert_called_once_with("span_name", 100.0, 0)
+    mock_profiler.log_span_success.assert_called_once_with(
+        "span_name", 100.0, 0, input_size_mb=None, output_size_mb=None
+    )
     mock_io_logger.log_output.assert_called_once_with("result", 0)
     mock_profiler.log_section_separator.assert_called_once_with(0)
 
@@ -96,9 +133,16 @@ def test_finish_tracing_no_output_logging(mocker):
     """Test _finish_tracing skips output logging when disabled."""
     mock_profiler = mocker.patch.object(Tracer, "profiler")
     mock_io_logger = mocker.patch.object(Tracer, "io_logger")
-    flags = TraceFlags(log=True, log_input=False, log_output=False, otel=False)
+    flags = TraceFlags(
+        log=True,
+        log_input=False,
+        log_output=False,
+        log_input_size=False,
+        log_output_size=False,
+        otel=False,
+    )
 
-    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags)
+    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags, None)
 
     mock_profiler.log_span_success.assert_called_once()
     mock_io_logger.log_output.assert_not_called()
@@ -112,7 +156,14 @@ def test_finish_tracing_failure_logging_enabled(mocker):
     mock_profiler = mocker.patch.object(Tracer, "profiler")
     mock_span = mocker.MagicMock()
     exception = ValueError("test")
-    flags = TraceFlags(log=True, log_input=False, log_output=False, otel=False)
+    flags = TraceFlags(
+        log=True,
+        log_input=False,
+        log_output=False,
+        log_input_size=False,
+        log_output_size=False,
+        otel=False,
+    )
 
     Tracer._finish_tracing_failure(mock_span, 0.05, "span_name", 1, exception, flags)
 
@@ -124,7 +175,14 @@ def test_finish_tracing_failure_logging_disabled(mocker):
     mock_profiler = mocker.patch.object(Tracer, "profiler")
     mock_span = mocker.MagicMock()
     exception = ValueError("test")
-    flags = TraceFlags(log=False, log_input=False, log_output=False, otel=False)
+    flags = TraceFlags(
+        log=False,
+        log_input=False,
+        log_output=False,
+        log_input_size=False,
+        log_output_size=False,
+        otel=False,
+    )
 
     Tracer._finish_tracing_failure(mock_span, 0.05, "span_name", 1, exception, flags)
 
