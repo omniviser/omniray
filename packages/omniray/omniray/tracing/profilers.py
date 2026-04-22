@@ -67,7 +67,7 @@ class SpanProfiler:
     _THRESHOLD_WARNING = 200
 
     @classmethod
-    def log_span_success(
+    def log_span_success(  # noqa: PLR0913
         cls,
         span_name: str,
         duration_ms: float,
@@ -75,8 +75,11 @@ class SpanProfiler:
         *,
         input_size_mb: float | None = None,
         output_size_mb: float | None = None,
+        rss_current_mb: float | None = None,
+        rss_delta_mb: float | None = None,
+        rss_peak_mb: float | None = None,
     ) -> None:
-        """Log span success with colored timing and optional I/O sizes."""
+        """Log span success with colored timing and optional I/O sizes / RSS."""
         indent = cls.get_indent(current_depth, is_start=False)
         color = cls._get_color_for_duration(duration_ms)
         reset = Style.RESET_ALL
@@ -90,6 +93,20 @@ class SpanProfiler:
         if output_size_mb is not None:
             segments.append(", out: %.2fMB")
             values.append(output_size_mb)
+        if rss_current_mb is not None:
+            segments.append(", rss: %.2fMB")
+            values.append(rss_current_mb)
+            rss_extras: list[str] = []
+            rss_extra_values: list[object] = []
+            if rss_delta_mb is not None:
+                rss_extras.append("\u0394%+.2fMB")
+                rss_extra_values.append(rss_delta_mb)
+            if rss_peak_mb is not None:
+                rss_extras.append("max: %.2fMB")
+                rss_extra_values.append(rss_peak_mb)
+            if rss_extras:
+                segments.append(" (" + ", ".join(rss_extras) + ")")
+                values.extend(rss_extra_values)
         segments.append(")%s %s%s")
         values.extend([reset, span_name, slow_warning + size_warning])
         logger.info("".join(segments), *values)

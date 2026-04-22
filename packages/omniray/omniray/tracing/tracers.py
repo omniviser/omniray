@@ -26,6 +26,7 @@ from omniray.tracing.otel import (
     otel_tracer,
 )
 from omniray.tracing.profilers import SpanProfiler
+from omniray.tracing.rss import read_peak_rss_mb, read_rss_mb
 from omniray.tracing.sizing import measure_size_mb
 from omniray.tracing.span_name_generator import SpanNameGenerator
 
@@ -62,6 +63,7 @@ class Tracer:
         log_output: bool | None = None,
         log_input_size: bool | None = None,
         log_output_size: bool | None = None,
+        log_rss: bool | None = None,
         otel: bool | None = None,
     ) -> CallResult:
         """Trace synchronous callable execution.
@@ -76,6 +78,7 @@ class Tracer:
             log_output: Override global OMNIRAY_LOG_OUTPUT per-function.
             log_input_size: Override global OMNIRAY_LOG_INPUT_SIZE per-function.
             log_output_size: Override global OMNIRAY_LOG_OUTPUT_SIZE per-function.
+            log_rss: Override global OMNIRAY_LOG_RSS per-function.
             otel: Override global OMNIRAY_OTEL per-function.
         """
         flags = resolve_trace_flags(
@@ -84,12 +87,13 @@ class Tracer:
             log_output=log_output,
             log_input_size=log_input_size,
             log_output_size=log_output_size,
+            log_rss=log_rss,
             otel=otel,
             otel_flag=OTEL_FLAG,
         )
         if flags.log:
             setup_console_handler()
-        span_name, current_depth, input_size_mb = cls._setup_trace(
+        span_name, current_depth, input_size_mb, rss_before_mb = cls._setup_trace(
             wrapped, args, kwargs, flags, instance=instance
         )
         try:
@@ -114,7 +118,13 @@ class Tracer:
                 else:
                     duration_s = time.time() - start_time
                     cls._finish_tracing(
-                        result, span_name, duration_s, current_depth, flags, input_size_mb
+                        result,
+                        span_name,
+                        duration_s,
+                        current_depth,
+                        flags,
+                        input_size_mb,
+                        rss_before_mb,
                     )
                     return result
                 finally:
@@ -141,18 +151,34 @@ class Tracer:
         current_depth: int,
         flags: TraceFlags,
         input_size_mb: float | None,
+        rss_before_mb: float | None,
     ) -> None:
         """Handle successful trace completion."""
         if not flags.log:
             return
         duration_ms = duration_s * 1000
         output_size_mb = measure_size_mb(result) if flags.log_output_size else None
+        rss_current_mb = read_rss_mb() if flags.log_rss else None
+        rss_delta_mb = (
+            rss_current_mb - rss_before_mb
+            if rss_current_mb is not None and rss_before_mb is not None
+            else None
+        )
+        rss_peak_mb = read_peak_rss_mb() if flags.log_rss else None
+        # Linux kernel updates ru_maxrss lazily (context switch / tick), while
+        # psutil reads current RSS live — peak can momentarily lag current.
+        # Enforce the invariant peak >= current in the app layer.
+        if rss_peak_mb is not None and rss_current_mb is not None:
+            rss_peak_mb = max(rss_peak_mb, rss_current_mb)
         cls.profiler.log_span_success(
             span_name,
             duration_ms,
             current_depth,
             input_size_mb=input_size_mb,
             output_size_mb=output_size_mb,
+            rss_current_mb=rss_current_mb,
+            rss_delta_mb=rss_delta_mb,
+            rss_peak_mb=rss_peak_mb,
         )
         if flags.log_output:
             cls.io_logger.log_output(result, current_depth)
@@ -184,21 +210,23 @@ class Tracer:
         flags: TraceFlags,
         *,
         instance: WraptInstance = None,
-    ) -> tuple[str, int, float | None]:
+    ) -> tuple[str, int, float | None, float | None]:
         """Setup tracing context before callable execution.
 
-        Returns ``(span_name, current_depth, input_size_mb)``. ``input_size_mb`` is
-        measured before *wrapped* runs so mutations inside the call don't skew
-        the reported value; ``None`` when the input-size flag is off.
+        Returns ``(span_name, current_depth, input_size_mb, rss_before_mb)``.
+        Both size and RSS baselines are captured before *wrapped* runs so
+        mutations during the call don't skew reported values; ``None`` when
+        the respective flag is off.
         """
         span_name = SpanNameGenerator.generate(wrapped, instance=instance)
         if not flags.log:
-            return span_name, 0, None
+            return span_name, 0, None, None
         current_depth = cls._update_depth(span_name)
         if flags.log_input:
             cls.io_logger.log_input(args, kwargs, wrapped, current_depth)
         input_size_mb = measure_size_mb((args, kwargs)) if flags.log_input_size else None
-        return span_name, current_depth, input_size_mb
+        rss_before_mb = read_rss_mb() if flags.log_rss else None
+        return span_name, current_depth, input_size_mb, rss_before_mb
 
     @classmethod
     def _update_depth(cls, span_name: str) -> int:
@@ -241,6 +269,7 @@ class AsyncTracer(Tracer):
         log_output: bool | None = None,
         log_input_size: bool | None = None,
         log_output_size: bool | None = None,
+        log_rss: bool | None = None,
         otel: bool | None = None,
     ) -> CallResult:
         """Trace asynchronous callable execution.
@@ -255,6 +284,7 @@ class AsyncTracer(Tracer):
             log_output: Override global OMNIRAY_LOG_OUTPUT per-function.
             log_input_size: Override global OMNIRAY_LOG_INPUT_SIZE per-function.
             log_output_size: Override global OMNIRAY_LOG_OUTPUT_SIZE per-function.
+            log_rss: Override global OMNIRAY_LOG_RSS per-function.
             otel: Override global OMNIRAY_OTEL per-function.
         """
         flags = resolve_trace_flags(
@@ -263,12 +293,13 @@ class AsyncTracer(Tracer):
             log_output=log_output,
             log_input_size=log_input_size,
             log_output_size=log_output_size,
+            log_rss=log_rss,
             otel=otel,
             otel_flag=OTEL_FLAG,
         )
         if flags.log:
             setup_console_handler()
-        span_name, current_depth, input_size_mb = cls._setup_trace(
+        span_name, current_depth, input_size_mb, rss_before_mb = cls._setup_trace(
             wrapped, args, kwargs, flags, instance=instance
         )
         try:
@@ -292,7 +323,13 @@ class AsyncTracer(Tracer):
                 else:
                     duration_s = time.time() - start_time
                     cls._finish_tracing(
-                        result, span_name, duration_s, current_depth, flags, input_size_mb
+                        result,
+                        span_name,
+                        duration_s,
+                        current_depth,
+                        flags,
+                        input_size_mb,
+                        rss_before_mb,
                     )
                     return result
                 finally:

@@ -283,3 +283,139 @@ async def test_trace_async_both_size_flags_on_passes_both(mocker):
     kwargs = mock_profiler.log_span_success.call_args.kwargs
     assert kwargs["input_size_mb"] == 0.1
     assert kwargs["output_size_mb"] == 2.5
+
+
+# ── RSS tracking ──────────────────────────────────────────────────────
+
+
+def _setup_rss_mocks(mocker, tracer_cls, *, rss_flag):
+    mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=True)
+    mocker.patch("omniray.tracing.flags.LOG_RSS_FLAG", new=rss_flag)
+    mocker.patch("omniray.tracing.flags._default_flags_cache", new={})
+    mocker.patch("omniray.tracing.tracers.OTEL_FLAG", new=False)
+    mocker.patch("omniray.tracing.tracers.logger")
+    return mocker.patch.object(tracer_cls, "profiler")
+
+
+def test_trace_sync_rss_flag_off_skips_measurement(mocker):
+    """log_rss off → rss readers not called; rss kwargs None on profiler call."""
+    mock_profiler = _setup_rss_mocks(mocker, Tracer, rss_flag=False)
+    mock_read = mocker.patch("omniray.tracing.tracers.read_rss_mb")
+    mock_peak = mocker.patch("omniray.tracing.tracers.read_peak_rss_mb")
+
+    def sample_func():
+        return "ok"
+
+    Tracer.trace(sample_func, (), {})
+
+    mock_read.assert_not_called()
+    mock_peak.assert_not_called()
+    kwargs = mock_profiler.log_span_success.call_args.kwargs
+    assert kwargs["rss_current_mb"] is None
+    assert kwargs["rss_delta_mb"] is None
+    assert kwargs["rss_peak_mb"] is None
+
+
+def test_trace_sync_rss_flag_on_passes_peak(mocker):
+    """log_rss on → read_peak_rss_mb called after wrapped; value reaches profiler."""
+    mock_profiler = _setup_rss_mocks(mocker, Tracer, rss_flag=True)
+    mocker.patch("omniray.tracing.tracers.read_rss_mb", side_effect=[10.0, 12.0])
+    mock_peak = mocker.patch(
+        "omniray.tracing.tracers.read_peak_rss_mb", return_value=3000.5
+    )
+
+    def sample_func():
+        return "ok"
+
+    Tracer.trace(sample_func, (), {})
+
+    mock_peak.assert_called_once()
+    kwargs = mock_profiler.log_span_success.call_args.kwargs
+    assert kwargs["rss_peak_mb"] == 3000.5
+
+
+def test_trace_sync_rss_peak_raised_to_current_when_kernel_lags(mocker):
+    """Linux kernel can report ru_maxrss < current RSS briefly — enforce peak >= current."""
+    mock_profiler = _setup_rss_mocks(mocker, Tracer, rss_flag=True)
+    mocker.patch("omniray.tracing.tracers.read_rss_mb", side_effect=[100.0, 196.42])
+    mocker.patch("omniray.tracing.tracers.read_peak_rss_mb", return_value=195.88)
+
+    def sample_func():
+        return "ok"
+
+    Tracer.trace(sample_func, (), {})
+
+    kwargs = mock_profiler.log_span_success.call_args.kwargs
+    assert kwargs["rss_current_mb"] == 196.42
+    assert kwargs["rss_peak_mb"] == 196.42  # raised to current
+
+
+def test_trace_sync_rss_flag_on_passes_current_and_delta(mocker):
+    """log_rss on → profiler receives rss_current_mb and computed delta."""
+    mock_profiler = _setup_rss_mocks(mocker, Tracer, rss_flag=True)
+    mock_read = mocker.patch(
+        "omniray.tracing.tracers.read_rss_mb", side_effect=[100.0, 112.34]
+    )
+
+    def sample_func():
+        return "ok"
+
+    Tracer.trace(sample_func, (), {})
+
+    assert mock_read.call_count == 2
+    kwargs = mock_profiler.log_span_success.call_args.kwargs
+    assert kwargs["rss_current_mb"] == 112.34
+    assert kwargs["rss_delta_mb"] == pytest.approx(12.34, abs=1e-9)
+
+
+def test_trace_sync_rss_flag_on_exception_skips_after(mocker):
+    """Exception → read_rss_mb called only for before; log_span_success not called."""
+    mock_profiler = _setup_rss_mocks(mocker, Tracer, rss_flag=True)
+    mock_read = mocker.patch(
+        "omniray.tracing.tracers.read_rss_mb", side_effect=[100.0]
+    )
+
+    def failing_func():
+        msg = "boom"
+        raise ValueError(msg)
+
+    with pytest.raises(ValueError, match="boom"):
+        Tracer.trace(failing_func, (), {})
+
+    assert mock_read.call_count == 1
+    mock_profiler.log_span_success.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_trace_async_rss_flag_on_passes_current_and_delta(mocker):
+    """Async mirror: rss on → current + delta reach profiler."""
+    mock_profiler = _setup_rss_mocks(mocker, AsyncTracer, rss_flag=True)
+    mock_read = mocker.patch(
+        "omniray.tracing.tracers.read_rss_mb", side_effect=[50.0, 75.5]
+    )
+
+    async def async_func():
+        await asyncio.sleep(0)
+        return "ok"
+
+    await AsyncTracer.trace(async_func, (), {})
+
+    assert mock_read.call_count == 2
+    kwargs = mock_profiler.log_span_success.call_args.kwargs
+    assert kwargs["rss_current_mb"] == 75.5
+    assert kwargs["rss_delta_mb"] == pytest.approx(25.5, abs=1e-9)
+
+
+def test_trace_sync_rss_read_fails_gracefully(mocker):
+    """read_rss_mb returning None → profiler gets both rss kwargs as None."""
+    mock_profiler = _setup_rss_mocks(mocker, Tracer, rss_flag=True)
+    mocker.patch("omniray.tracing.tracers.read_rss_mb", return_value=None)
+
+    def sample_func():
+        return "ok"
+
+    Tracer.trace(sample_func, (), {})
+
+    kwargs = mock_profiler.log_span_success.call_args.kwargs
+    assert kwargs["rss_current_mb"] is None
+    assert kwargs["rss_delta_mb"] is None

@@ -70,6 +70,7 @@ def test_resolve_trace_flags_cache_returns_same_object():
         "log_output": None,
         "log_input_size": None,
         "log_output_size": None,
+        "log_rss": None,
         "otel": None,
         "otel_flag": None,
     }
@@ -86,6 +87,7 @@ _BASE_KWARGS = {
     "log_output": None,
     "log_input_size": None,
     "log_output_size": None,
+    "log_rss": None,
     "otel": None,
     "otel_flag": None,
 }
@@ -144,3 +146,43 @@ def test_resolve_trace_flags_size_flags_default_false(mocker):
     result = resolve_trace_flags(**_BASE_KWARGS)
     assert result.log_input_size is False
     assert result.log_output_size is False
+
+
+# ── log_rss resolution ────────────────────────────────────────────────
+
+
+@pytest.mark.usefixtures("_clear_flags_cache")
+def test_resolve_trace_flags_log_rss_global_on(mocker):
+    """LOG_RSS_FLAG=True with CONSOLE_LOG_FLAG=True yields log_rss=True."""
+    mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=True)
+    mocker.patch("omniray.tracing.flags.LOG_RSS_FLAG", new=True)
+    result = resolve_trace_flags(**_BASE_KWARGS)
+    assert result.log_rss is True
+
+
+@pytest.mark.usefixtures("_clear_flags_cache")
+def test_resolve_trace_flags_log_rss_gated_by_log(mocker):
+    """LOG_RSS_FLAG=True with CONSOLE_LOG_FLAG=False is suppressed."""
+    mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=False)
+    mocker.patch("omniray.tracing.flags.LOG_RSS_FLAG", new=True)
+    result = resolve_trace_flags(**_BASE_KWARGS)
+    assert result.log_rss is False
+
+
+@pytest.mark.usefixtures("_clear_flags_cache")
+def test_resolve_trace_flags_log_rss_per_function_override(mocker):
+    """Local log_rss=True overrides global=None when console log is on."""
+    mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=True)
+    mocker.patch("omniray.tracing.flags.LOG_RSS_FLAG", new=None)
+    kwargs = {**_BASE_KWARGS, "log_rss": True}
+    result = resolve_trace_flags(**kwargs)
+    assert result.log_rss is True
+
+
+@pytest.mark.usefixtures("_clear_flags_cache")
+def test_resolve_trace_flags_log_rss_default_false(mocker):
+    """log_rss defaults to False when env var unset."""
+    mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=True)
+    mocker.patch("omniray.tracing.flags.LOG_RSS_FLAG", new=None)
+    result = resolve_trace_flags(**_BASE_KWARGS)
+    assert result.log_rss is False

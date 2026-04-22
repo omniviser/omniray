@@ -47,7 +47,9 @@ def test_sync_per_call_resolution(mocker):
     """Flags are resolved per call, not captured at factory time."""
     mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=True)
     mocker.patch("omniray.tracing.tracers.otel_tracer")
-    mock_setup = mocker.patch.object(Tracer, "_setup_trace", return_value=("span_name", 0, None))
+    mock_setup = mocker.patch.object(
+        Tracer, "_setup_trace", return_value=("span_name", 0, None, None)
+    )
     mocker.patch.object(Tracer, "_init_tracing", return_value=0.0)
     mocker.patch.object(Tracer, "_finish_tracing")
     mocker.patch.object(Tracer, "_trace_duration")
@@ -75,7 +77,7 @@ def test_sync_otel_per_call(mocker):
     """Otel param is resolved per call in create_trace_wrapper."""
     mocker.patch("omniray.tracing.tracers.OTEL_FLAG", new=None)
     mock_tracer = mocker.patch("omniray.tracing.tracers.otel_tracer")
-    mocker.patch.object(Tracer, "_setup_trace", return_value=("span_name", 0, None))
+    mocker.patch.object(Tracer, "_setup_trace", return_value=("span_name", 0, None, None))
     mocker.patch.object(Tracer, "_init_tracing", return_value=0.0)
     mocker.patch.object(Tracer, "_finish_tracing")
     mocker.patch.object(Tracer, "_trace_duration")
@@ -93,7 +95,9 @@ def test_sync_log_param(mocker):
     """Log param controls console output in create_trace_wrapper."""
     mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=None)
     mocker.patch("omniray.tracing.tracers.otel_tracer")
-    mock_setup = mocker.patch.object(Tracer, "_setup_trace", return_value=("span_name", 0, None))
+    mock_setup = mocker.patch.object(
+        Tracer, "_setup_trace", return_value=("span_name", 0, None, None)
+    )
     mocker.patch.object(Tracer, "_init_tracing", return_value=0.0)
     mocker.patch.object(Tracer, "_finish_tracing")
     mocker.patch.object(Tracer, "_trace_duration")
@@ -112,7 +116,9 @@ def test_sync_log_input_size_param_passes_through(mocker):
     """log_input_size forwarded through create_trace_wrapper into TraceFlags."""
     mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=True)
     mocker.patch("omniray.tracing.tracers.otel_tracer")
-    mock_setup = mocker.patch.object(Tracer, "_setup_trace", return_value=("span_name", 0, None))
+    mock_setup = mocker.patch.object(
+        Tracer, "_setup_trace", return_value=("span_name", 0, None, None)
+    )
     mocker.patch.object(Tracer, "_init_tracing", return_value=0.0)
     mocker.patch.object(Tracer, "_finish_tracing")
     mocker.patch.object(Tracer, "_trace_duration")
@@ -131,7 +137,9 @@ def test_sync_log_output_size_param_passes_through(mocker):
     """log_output_size forwarded through create_trace_wrapper into TraceFlags."""
     mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=True)
     mocker.patch("omniray.tracing.tracers.otel_tracer")
-    mock_setup = mocker.patch.object(Tracer, "_setup_trace", return_value=("span_name", 0, None))
+    mock_setup = mocker.patch.object(
+        Tracer, "_setup_trace", return_value=("span_name", 0, None, None)
+    )
     mocker.patch.object(Tracer, "_init_tracing", return_value=0.0)
     mocker.patch.object(Tracer, "_finish_tracing")
     mocker.patch.object(Tracer, "_trace_duration")
@@ -144,3 +152,24 @@ def test_sync_log_output_size_param_passes_through(mocker):
     sync_wrapper(wrapped_func, None, (), {})
     flags = mock_setup.call_args[0][3]
     assert flags.log_output_size is True
+
+
+def test_sync_log_rss_param_passes_through(mocker):
+    """log_rss forwarded through create_trace_wrapper into TraceFlags."""
+    mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=True)
+    mocker.patch("omniray.tracing.tracers.otel_tracer")
+    mock_setup = mocker.patch.object(
+        Tracer, "_setup_trace", return_value=("span_name", 0, None, None)
+    )
+    mocker.patch.object(Tracer, "_init_tracing", return_value=0.0)
+    mocker.patch.object(Tracer, "_finish_tracing")
+    mocker.patch.object(Tracer, "_trace_duration")
+
+    sync_wrapper, _ = create_trace_wrapper(log_rss=True)
+
+    def wrapped_func():
+        return "ok"
+
+    sync_wrapper(wrapped_func, None, (), {})
+    flags = mock_setup.call_args[0][3]
+    assert flags.log_rss is True

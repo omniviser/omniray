@@ -113,6 +113,122 @@ def test_log_span_success_no_big_tag_when_sizes_none(mocker, monkeypatch):
     assert "[BIG]" not in trailing
 
 
+# --- RSS segment ---
+
+
+def test_log_span_success_rss_current_only(mocker):
+    """rss_current_mb alone → 'rss: X.XXMB' without delta segment."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success("test_span", 5.5, 0, rss_current_mb=234.5)
+
+    fmt = mock_logger.info.call_args[0][0]
+    assert ", rss: %.2fMB" in fmt
+    assert "\u0394" not in fmt
+
+
+def test_log_span_success_rss_current_and_delta_positive(mocker):
+    """Both rss values → 'rss: X.XXMB (\u0394+Y.YYMB)' with both in call args."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success(
+        "test_span", 5.5, 0, rss_current_mb=234.5, rss_delta_mb=12.34
+    )
+
+    call_args = mock_logger.info.call_args[0]
+    fmt = call_args[0]
+    assert ", rss: %.2fMB" in fmt
+    assert "(\u0394%+.2fMB)" in fmt
+    assert 234.5 in call_args
+    assert 12.34 in call_args
+
+
+def test_log_span_success_rss_negative_delta_value_is_negative(mocker):
+    """Negative delta passes as negative float; %+ handles sign rendering."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success(
+        "test_span", 5.5, 0, rss_current_mb=100.0, rss_delta_mb=-5.0
+    )
+
+    assert -5.0 in mock_logger.info.call_args[0]
+
+
+def test_log_span_success_rss_both_none_no_segment(mocker):
+    """rss both None → no 'rss:' in format (backward-compat)."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success("test_span", 5.5, 0)
+
+    fmt = mock_logger.info.call_args[0][0]
+    assert "rss:" not in fmt
+
+
+def test_log_span_success_segment_order_in_then_out_then_rss(mocker):
+    """With all segments: 'in:' before 'out:' before 'rss:' in format string."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success(
+        "test_span",
+        5.5,
+        0,
+        input_size_mb=0.1,
+        output_size_mb=1.2,
+        rss_current_mb=234.5,
+        rss_delta_mb=12.34,
+    )
+
+    fmt = mock_logger.info.call_args[0][0]
+    assert fmt.index("in: %.2fMB") < fmt.index("out: %.2fMB") < fmt.index("rss: %.2fMB")
+
+
+def test_log_span_success_rss_peak_only(mocker):
+    """rss_current + rss_peak (no delta) → '(max: %.2fMB)' without Δ."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success(
+        "test_span", 5.5, 0, rss_current_mb=100.0, rss_peak_mb=3000.0
+    )
+
+    call_args = mock_logger.info.call_args[0]
+    fmt = call_args[0]
+    assert "(max: %.2fMB)" in fmt
+    assert "\u0394" not in fmt
+    assert 3000.0 in call_args
+
+
+def test_log_span_success_rss_delta_and_peak_both(mocker):
+    """Both delta and peak → '(Δ%+.2fMB, max: %.2fMB)' — delta first, peak second."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success(
+        "test_span",
+        5.5,
+        0,
+        rss_current_mb=234.5,
+        rss_delta_mb=12.34,
+        rss_peak_mb=3000.0,
+    )
+
+    call_args = mock_logger.info.call_args[0]
+    fmt = call_args[0]
+    assert "(\u0394%+.2fMB, max: %.2fMB)" in fmt
+    assert 234.5 in call_args
+    assert 12.34 in call_args
+    assert 3000.0 in call_args
+
+
+def test_log_span_success_rss_peak_alone_when_current_none(mocker):
+    """rss_peak given but rss_current None → no 'rss:' segment at all (peak gated)."""
+    mock_logger = mocker.patch("omniray.tracing.profilers.logger")
+
+    SpanProfiler.log_span_success("test_span", 5.5, 0, rss_peak_mb=3000.0)
+
+    fmt = mock_logger.info.call_args[0][0]
+    assert "rss:" not in fmt
+    assert "max:" not in fmt
+
+
 def test_log_span_failure(mocker):
     """Test log_span_failure logs correct format."""
     mock_logger = mocker.patch("omniray.tracing.profilers.logger")

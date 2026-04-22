@@ -27,6 +27,7 @@ LOG_INPUT_FLAG = _env_flag("OMNIRAY_LOG_INPUT")
 LOG_OUTPUT_FLAG = _env_flag("OMNIRAY_LOG_OUTPUT")
 LOG_INPUT_SIZE_FLAG = _env_flag("OMNIRAY_LOG_INPUT_SIZE")
 LOG_OUTPUT_SIZE_FLAG = _env_flag("OMNIRAY_LOG_OUTPUT_SIZE")
+LOG_RSS_FLAG = _env_flag("OMNIRAY_LOG_RSS")
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,7 @@ class TraceFlags:
     log_output: bool
     log_input_size: bool
     log_output_size: bool
+    log_rss: bool
     otel: bool
 
 
@@ -51,6 +53,7 @@ def resolve_trace_flags(  # noqa: PLR0913
     log_output: bool | None,
     log_input_size: bool | None,
     log_output_size: bool | None,
+    log_rss: bool | None,
     otel: bool | None,
     otel_flag: bool | None,
 ) -> TraceFlags:
@@ -66,6 +69,7 @@ def resolve_trace_flags(  # noqa: PLR0913
         and log_output is None
         and log_input_size is None
         and log_output_size is None
+        and log_rss is None
         and otel is None
     ):
         cached = _default_flags_cache.get(otel_flag)
@@ -77,6 +81,7 @@ def resolve_trace_flags(  # noqa: PLR0913
             log_output=None,
             log_input_size=None,
             log_output_size=None,
+            log_rss=None,
             otel=None,
             otel_flag=otel_flag,
         )
@@ -88,6 +93,7 @@ def resolve_trace_flags(  # noqa: PLR0913
         log_output=log_output,
         log_input_size=log_input_size,
         log_output_size=log_output_size,
+        log_rss=log_rss,
         otel=otel,
         otel_flag=otel_flag,
     )
@@ -100,6 +106,7 @@ def _resolve_all(  # noqa: PLR0913
     log_output: bool | None,
     log_input_size: bool | None,
     log_output_size: bool | None,
+    log_rss: bool | None,
     otel: bool | None,
     otel_flag: bool | None,
 ) -> TraceFlags:
@@ -115,5 +122,6 @@ def _resolve_all(  # noqa: PLR0913
             resolve_flag(global_flag=LOG_OUTPUT_SIZE_FLAG, local_flag=log_output_size)
             and should_log
         ),
+        log_rss=resolve_flag(global_flag=LOG_RSS_FLAG, local_flag=log_rss) and should_log,
         otel=resolve_flag(global_flag=otel_flag, local_flag=otel),
     )

@@ -42,6 +42,7 @@ def validate_input(data: dict) -> bool: ...
 | `OMNIRAY_LOG_INPUT_SIZE` | `false` | Append deep input size (MB) to the timing line. Uses `pympler.asizeof` — opt-in, can be slow on very large object graphs. |
 | `OMNIRAY_LOG_OUTPUT_SIZE` | `false` | Append deep return-value size (MB) to the timing line. Uses `pympler.asizeof` — opt-in, can be slow on very large object graphs. |
 | `OMNIRAY_SIZE_WARNING_MB` | `10` | MB threshold above which a `[BIG]` warning tag appears next to the span name when input/output size measurement is enabled. |
+| `OMNIRAY_LOG_RSS` | `false` | Append process RSS (current MB, delta before→after, peak since process start) to the timing line. Current RSS uses `psutil`; peak uses `resource.getrusage` (Unix). ~5–20µs per call. |
 | `OMNIRAY_LOG_COLOR` | `true` | Enable ANSI colors in console output |
 | `OMNIRAY_LOG_STYLE` | `auto` | Box-drawing style: `unicode`, `ascii`, or `auto` (detect from terminal) |
 

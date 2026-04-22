@@ -32,10 +32,11 @@ def test_setup_trace_logging_disabled():
         log_output=False,
         log_input_size=False,
         log_output_size=False,
+        log_rss=False,
         otel=False,
     )
 
-    span_name, depth, _ = Tracer._setup_trace(_setup_trace_helper, (), {}, flags)
+    span_name, depth, _, _ = Tracer._setup_trace(_setup_trace_helper, (), {}, flags)
 
     # Span name is always generated for Azure Application Insights
     assert span_name == "_setup_trace_helper"
@@ -54,10 +55,11 @@ def test_setup_trace_logging_enabled(mocker):
         log_output=False,
         log_input_size=False,
         log_output_size=False,
+        log_rss=False,
         otel=False,
     )
 
-    span_name, depth, _ = Tracer._setup_trace(_setup_trace_helper, (), {}, flags)
+    span_name, depth, _, _ = Tracer._setup_trace(_setup_trace_helper, (), {}, flags)
 
     assert span_name == "_setup_trace_helper"
     assert depth == 0
@@ -76,6 +78,7 @@ def test_setup_trace_no_input_logging(mocker):
         log_output=False,
         log_input_size=False,
         log_output_size=False,
+        log_rss=False,
         otel=False,
     )
 
@@ -99,10 +102,11 @@ def test_finish_tracing_logging_disabled(mocker):
         log_output=True,
         log_input_size=False,
         log_output_size=False,
+        log_rss=False,
         otel=False,
     )
 
-    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags, None)
+    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags, None, None)
 
     mock_profiler.log_span_success.assert_not_called()
 
@@ -117,13 +121,21 @@ def test_finish_tracing_logging_enabled(mocker):
         log_output=True,
         log_input_size=False,
         log_output_size=False,
+        log_rss=False,
         otel=False,
     )
 
-    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags, None)
+    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags, None, None)
 
     mock_profiler.log_span_success.assert_called_once_with(
-        "span_name", 100.0, 0, input_size_mb=None, output_size_mb=None
+        "span_name",
+        100.0,
+        0,
+        input_size_mb=None,
+        output_size_mb=None,
+        rss_current_mb=None,
+        rss_delta_mb=None,
+        rss_peak_mb=None,
     )
     mock_io_logger.log_output.assert_called_once_with("result", 0)
     mock_profiler.log_section_separator.assert_called_once_with(0)
@@ -139,10 +151,11 @@ def test_finish_tracing_no_output_logging(mocker):
         log_output=False,
         log_input_size=False,
         log_output_size=False,
+        log_rss=False,
         otel=False,
     )
 
-    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags, None)
+    Tracer._finish_tracing("result", "span_name", 0.1, 0, flags, None, None)
 
     mock_profiler.log_span_success.assert_called_once()
     mock_io_logger.log_output.assert_not_called()
@@ -162,6 +175,7 @@ def test_finish_tracing_failure_logging_enabled(mocker):
         log_output=False,
         log_input_size=False,
         log_output_size=False,
+        log_rss=False,
         otel=False,
     )
 
@@ -181,6 +195,7 @@ def test_finish_tracing_failure_logging_disabled(mocker):
         log_output=False,
         log_input_size=False,
         log_output_size=False,
+        log_rss=False,
         otel=False,
     )
 
