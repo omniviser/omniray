@@ -45,7 +45,7 @@ def test_trace_sync_without_otel_console_still_works(mocker):
     mocker.patch("omniray.tracing.flags.LOG_INPUT_FLAG", new=True)
     mocker.patch("omniray.tracing.flags.LOG_OUTPUT_FLAG", new=True)
     mocker.patch("omniray.tracing.tracers.logger")
-    mock_profiler = mocker.patch.object(Tracer, "profiler")
+    mock_profiler = mocker.patch("omniray.tracing.tracers.profilers")
     mock_io_logger = mocker.patch.object(Tracer, "io_logger")
 
     def sample_func():
@@ -64,7 +64,7 @@ def test_trace_sync_without_otel_error_no_real_span(mocker):
     mocker.patch("omniray.tracing.tracers.OTEL_FLAG", new=False)
     mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=True)
     mocker.patch("omniray.tracing.tracers.logger")
-    mock_profiler = mocker.patch.object(Tracer, "profiler")
+    mock_profiler = mocker.patch("omniray.tracing.tracers.profilers")
     mock_tracer = mocker.patch("omniray.tracing.tracers.otel_tracer")
 
     error_msg = "test error"
@@ -86,7 +86,7 @@ def test_trace_log_true_overrides_global_none(mocker):
     """Per-function log=True activates console when global is unset."""
     mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=None)
     mocker.patch("omniray.tracing.tracers.logger")
-    mock_profiler = mocker.patch.object(Tracer, "profiler")
+    mock_profiler = mocker.patch("omniray.tracing.tracers.profilers")
 
     def sample_func():
         return "result"
@@ -100,7 +100,7 @@ def test_trace_log_true_overrides_global_none(mocker):
 def test_trace_log_true_blocked_by_global_false(mocker):
     """Per-function log=True is ignored when global is False (kill switch)."""
     mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=False)
-    mock_profiler = mocker.patch.object(Tracer, "profiler")
+    mock_profiler = mocker.patch("omniray.tracing.tracers.profilers")
 
     def sample_func():
         return "result"
@@ -114,7 +114,7 @@ def test_trace_log_true_blocked_by_global_false(mocker):
 def test_trace_log_false_overrides_global_true(mocker):
     """Per-function log=False disables console when global is True."""
     mocker.patch("omniray.tracing.flags.CONSOLE_LOG_FLAG", new=True)
-    mock_profiler = mocker.patch.object(Tracer, "profiler")
+    mock_profiler = mocker.patch("omniray.tracing.tracers.profilers")
 
     def sample_func():
         return "result"

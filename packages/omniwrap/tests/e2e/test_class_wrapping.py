@@ -165,11 +165,13 @@ def test_mixed_functions_and_classes_wrapped(create_module, calls, sync_wrapper_
 
     calls.clear()
     calc = Calculator()
-    assert calc.add(2, 3) == 5  # noqa: PLR2004
+    a, b = 2, 3
+    assert calc.add(a, b) == a + b
     assert calls == ["b_before", "a_before", "a_after", "b_after"]
 
     calls.clear()
-    assert Calculator.multiply(4, 5) == 20  # noqa: PLR2004
+    x, y = 4, 5
+    assert Calculator.multiply(x, y) == x * y
     assert calls == ["b_before", "a_before", "a_after", "b_after"]
 
 

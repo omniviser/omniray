@@ -6,11 +6,14 @@ Use `@trace` for manual per-function instrumentation. For automatic instrumentat
 from omniray import trace
 
 @trace(
-    log=None,         # Override OMNIRAY_LOG per-function
-    log_input=None,   # Override OMNIRAY_LOG_INPUT per-function
-    log_output=None,  # Override OMNIRAY_LOG_OUTPUT per-function
-    skip_if=None,     # Predicate: skip tracing when True
-    otel=None,        # Override OMNIRAY_OTEL per-function
+    log=None,              # Override OMNIRAY_LOG per-function
+    log_input=None,        # Override OMNIRAY_LOG_INPUT per-function
+    log_output=None,       # Override OMNIRAY_LOG_OUTPUT per-function
+    log_input_size=None,   # Override OMNIRAY_LOG_INPUT_SIZE per-function
+    log_output_size=None,  # Override OMNIRAY_LOG_OUTPUT_SIZE per-function
+    log_rss=None,          # Override OMNIRAY_LOG_RSS per-function
+    skip_if=None,          # Predicate: skip tracing when True
+    otel=None,             # Override OMNIRAY_OTEL per-function
 )
 def my_function(): ...
 ```
@@ -58,6 +61,24 @@ You can also enable I/O logging globally via environment variables (not recommen
 ```bash
 OMNIRAY_LOG=true OMNIRAY_LOG_INPUT=true OMNIRAY_LOG_OUTPUT=true python app.py
 ```
+
+## Payload Size & Memory
+
+Append deep payload size and process RSS to the timing line, for selective memory profiling:
+
+```python
+@trace(log_input_size=True, log_output_size=True, log_rss=True)
+def build_embeddings(docs: list[Document]) -> np.ndarray: ...
+```
+
+```
+14:23  INFO: │  └─ (812.4ms) build_embeddings  IN=3.2MB  OUT=48.1MB [BIG]  rss=612/+47/612MB
+```
+
+- **`log_input_size` / `log_output_size`** — deep size via `pympler.asizeof`. Opt-in because it walks the full object graph; slow on very large structures. A `[BIG]` tag is appended when either side crosses `size_big_tag_mb` (default 10 MB, configurable under `[tool.omniray]`).
+- **`log_rss`** — process resident set size as *current / delta / peak* (MB). ~5–20µs per call — safe to leave on broadly.
+
+All three honor the same kill-switch semantics as `log_input` / `log_output`: env var `false` wins over any per-function override.
 
 ## Conditional Skip
 

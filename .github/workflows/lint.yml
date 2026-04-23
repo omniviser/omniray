@@ -21,20 +21,17 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
-      - name: Install dependencies
-        run: |
-          uv pip install ruff mypy --system
-          cd packages/omniwrap && uv pip install -e . --system && cd ../..
-          cd packages/omniray && uv pip install -e ".[otel]" --system
+      - name: Sync workspace
+        run: uv sync --all-extras --all-packages
 
       - name: Ruff check
-        run: ruff check packages/
+        run: uv run ruff check packages/
 
       - name: Ruff format
-        run: ruff format --check packages/
+        run: uv run ruff format --check packages/
 
       - name: MyPy omniwrap
-        run: cd packages/omniwrap && mypy omniwrap/
+        run: uv run --directory packages/omniwrap mypy omniwrap/
 
       - name: MyPy omniray
-        run: cd packages/omniray && mypy omniray/
+        run: uv run --directory packages/omniray mypy omniray/

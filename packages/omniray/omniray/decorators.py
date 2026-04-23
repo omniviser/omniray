@@ -26,11 +26,14 @@ def _exclude_from_omniwrap[**P, T](func: Callable[P, T]) -> Callable[P, T]:
     return func
 
 
-def trace[**P, T](
+def trace[**P, T](  # noqa: PLR0913
     *,
     log: bool | None = None,
     log_input: bool | None = None,
     log_output: bool | None = None,
+    log_input_size: bool | None = None,
+    log_output_size: bool | None = None,
+    log_rss: bool | None = None,
     skip_if: Callable[..., bool] | None = None,
     otel: bool | None = None,
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
@@ -44,6 +47,9 @@ def trace[**P, T](
         log: Override global OMNIRAY_LOG setting per-function.
         log_input: Override global OMNIRAY_LOG_INPUT setting.
         log_output: Override global OMNIRAY_LOG_OUTPUT setting.
+        log_input_size: Override global OMNIRAY_LOG_INPUT_SIZE setting.
+        log_output_size: Override global OMNIRAY_LOG_OUTPUT_SIZE setting.
+        log_rss: Override global OMNIRAY_LOG_RSS setting.
         skip_if: Predicate receiving the decorated function's arguments.
             When it returns ``True``, tracing is bypassed entirely and the
             function is called directly.
@@ -64,6 +70,9 @@ def trace[**P, T](
                     log=log,
                     log_input=log_input,
                     log_output=log_output,
+                    log_input_size=log_input_size,
+                    log_output_size=log_output_size,
+                    log_rss=log_rss,
                     otel=otel,
                 )
 
@@ -83,6 +92,9 @@ def trace[**P, T](
                 log=log,
                 log_input=log_input,
                 log_output=log_output,
+                log_input_size=log_input_size,
+                log_output_size=log_output_size,
+                log_rss=log_rss,
                 otel=otel,
             )
 
@@ -91,11 +103,14 @@ def trace[**P, T](
     return decorator
 
 
-def create_trace_wrapper(
+def create_trace_wrapper(  # noqa: PLR0913
     *,
     log: bool | None = None,
     log_input: bool | None = None,
     log_output: bool | None = None,
+    log_input_size: bool | None = None,
+    log_output_size: bool | None = None,
+    log_rss: bool | None = None,
     skip_if: Callable[..., bool] | None = None,
     otel: bool | None = None,
 ) -> tuple[Callable, Callable]:
@@ -105,6 +120,9 @@ def create_trace_wrapper(
         log: Override global OMNIRAY_LOG setting.
         log_input: Override global OMNIRAY_LOG_INPUT setting.
         log_output: Override global OMNIRAY_LOG_OUTPUT setting.
+        log_input_size: Override global OMNIRAY_LOG_INPUT_SIZE setting.
+        log_output_size: Override global OMNIRAY_LOG_OUTPUT_SIZE setting.
+        log_rss: Override global OMNIRAY_LOG_RSS setting.
         skip_if: Predicate receiving the wrapped function's arguments.
             When it returns ``True``, tracing is bypassed entirely and the
             function is called directly.  Note: wrapt separates ``self``/``cls``
@@ -129,6 +147,9 @@ def create_trace_wrapper(
             log=log,
             log_input=log_input,
             log_output=log_output,
+            log_input_size=log_input_size,
+            log_output_size=log_output_size,
+            log_rss=log_rss,
             otel=otel,
         )
 
@@ -145,6 +166,9 @@ def create_trace_wrapper(
             log=log,
             log_input=log_input,
             log_output=log_output,
+            log_input_size=log_input_size,
+            log_output_size=log_output_size,
+            log_rss=log_rss,
             otel=otel,
         )
 

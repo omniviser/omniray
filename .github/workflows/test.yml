@@ -26,25 +26,14 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
-      - name: Install omniwrap
-        run: |
-          cd packages/omniwrap
-          uv pip install -e ".[dev]" --system
+      - name: Sync workspace
+        run: uv sync --all-extras --all-packages
 
       - name: Test omniwrap
-        run: |
-          cd packages/omniwrap
-          uv run pytest tests/ -v --cov=omniwrap --cov-report=xml --cov-fail-under=100
-
-      - name: Install omniray
-        run: |
-          cd packages/omniray
-          uv pip install -e ".[dev]" --system
+        run: uv run --directory packages/omniwrap pytest tests/ -v --cov=omniwrap --cov-report=xml --cov-fail-under=100
 
       - name: Test omniray
-        run: |
-          cd packages/omniray
-          uv run pytest tests/ -v --cov=omniray --cov-report=xml --cov-fail-under=100
+        run: uv run --directory packages/omniray pytest tests/ -v --cov=omniray --cov-report=xml --cov-fail-under=100
 
   test-minimum-versions:
     name: Test minimum dependency versions
@@ -60,22 +49,11 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
-      - name: Install omniwrap (min versions)
-        run: |
-          cd packages/omniwrap
-          uv pip install -e ".[dev]" --system --resolution=lowest-direct
+      - name: Sync workspace (min versions)
+        run: uv sync --all-extras --all-packages --resolution=lowest-direct
 
       - name: Test omniwrap
-        run: |
-          cd packages/omniwrap
-          uv run pytest tests/ -v
-
-      - name: Install omniray (min versions)
-        run: |
-          cd packages/omniray
-          uv pip install -e ".[dev]" --system --resolution=lowest-direct
+        run: uv run --directory packages/omniwrap pytest tests/ -v
 
       - name: Test omniray
-        run: |
-          cd packages/omniray
-          uv run pytest tests/ -v
+        run: uv run --directory packages/omniray pytest tests/ -v

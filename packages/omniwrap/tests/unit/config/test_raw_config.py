@@ -1,6 +1,4 @@
-"""Tests for RawConfig dataclass."""
-
-import logging
+"""Tests for RawConfig dataclass validation (``__post_init__``)."""
 
 import pytest
 from omniwrap.config import RawConfig
@@ -63,20 +61,3 @@ def test_valid_values_pass_validation(paths, exclude):
 
     assert config.paths == paths
     assert config.exclude == exclude
-
-
-def test_from_dict_partial_config_fills_missing_with_none():
-    """Dict with only some keys fills others with None."""
-    config = RawConfig.from_dict({"paths": ["src"]})
-
-    assert config.paths == ["src"]
-    assert config.exclude is None
-
-
-def test_from_dict_unknown_key_logs_warning(caplog):
-    """Unknown keys trigger warning about possible typo."""
-    with caplog.at_level(logging.WARNING, logger="omniwrap.config"):
-        RawConfig.from_dict({"path": ["src"]})  # typo: 'path' instead of 'paths'
-
-    assert "Unknown config keys" in caplog.text
-    assert "path" in caplog.text
