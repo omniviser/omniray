@@ -1,6 +1,7 @@
 """Tests for omniray.tracing.rss."""
 
 import psutil
+import pytest
 from omniray.tracing import rss
 from omniray.tracing.rss import read_peak_rss_mb, read_rss_mb
 
@@ -55,17 +56,32 @@ def test_current_process_reuses_cache_when_pid_matches(mocker):
     assert result is cached
 
 
+@pytest.mark.skipif(rss._resource is None, reason="requires POSIX resource module")
 def test_read_peak_rss_mb_returns_positive_float():
     result = read_peak_rss_mb()
     assert isinstance(result, float)
     assert result > 0
 
 
+def _fake_resource(mocker, ru_maxrss=0, getrusage_side_effect=None):
+    """Return a mock stand-in for the ``resource`` module.
+
+    Tests use this so ``_resource`` can be patched as a whole module on
+    Windows, where ``import resource`` fails and ``rss._resource is None``.
+    """
+    fake = mocker.MagicMock()
+    fake.RUSAGE_SELF = 0
+    if getrusage_side_effect is not None:
+        fake.getrusage.side_effect = getrusage_side_effect
+    else:
+        fake.getrusage.return_value = mocker.MagicMock(ru_maxrss=ru_maxrss)
+    return fake
+
+
 def test_read_peak_rss_mb_linux_unit_is_kb(mocker):
     """Linux path: ru_maxrss in KB → multiply by 1024 then divide by 1MB."""
     mocker.patch.object(rss, "_MAXRSS_TO_BYTES", 1024)
-    fake_usage = mocker.MagicMock(ru_maxrss=2_000_000)  # 2_000_000 KB
-    mocker.patch.object(rss._resource, "getrusage", return_value=fake_usage)
+    mocker.patch.object(rss, "_resource", _fake_resource(mocker, ru_maxrss=2_000_000))
     result = read_peak_rss_mb()
     assert result == 2_000_000 * 1024 / (1024 * 1024)
 
@@ -73,14 +89,15 @@ def test_read_peak_rss_mb_linux_unit_is_kb(mocker):
 def test_read_peak_rss_mb_macos_unit_is_bytes(mocker):
     """macOS path: ru_maxrss in bytes → / 1MB."""
     mocker.patch.object(rss, "_MAXRSS_TO_BYTES", 1)
-    fake_usage = mocker.MagicMock(ru_maxrss=3_000_000_000)  # bytes
-    mocker.patch.object(rss._resource, "getrusage", return_value=fake_usage)
+    mocker.patch.object(rss, "_resource", _fake_resource(mocker, ru_maxrss=3_000_000_000))
     result = read_peak_rss_mb()
     assert result == 3_000_000_000 / (1024 * 1024)
 
 
 def test_read_peak_rss_mb_catches_exceptions(mocker):
-    mocker.patch.object(rss._resource, "getrusage", side_effect=RuntimeError("boom"))
+    mocker.patch.object(
+        rss, "_resource", _fake_resource(mocker, getrusage_side_effect=RuntimeError("boom"))
+    )
     mock_debug = mocker.patch.object(rss.logger, "debug")
 
     result = read_peak_rss_mb()

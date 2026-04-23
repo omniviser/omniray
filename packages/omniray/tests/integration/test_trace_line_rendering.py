@@ -8,10 +8,12 @@ via ``omniray_caplog`` fixture and asserted after stripping ANSI.
 import re
 import time
 
+import pytest
 from colorama import Fore, Style
 from omniray.decorators import trace
 from omniray.tracing import flags as flags_module
 from omniray.tracing import profilers
+from omniray.tracing.rss import _resource as _rss_resource
 from omniray.tracing.thresholds import Thresholds
 
 
@@ -90,6 +92,7 @@ def test_input_output_size_rendered(monkeypatch, omniray_caplog):
     assert float(match_out.group(1)) >= 2.0  # ~2 MB returned
 
 
+@pytest.mark.skipif(_rss_resource is None, reason="peak RSS requires POSIX resource module")
 def test_rss_segment_with_delta_and_peak(monkeypatch, omniray_caplog):
     _enable_flags(monkeypatch, CONSOLE_LOG_FLAG=True, LOG_RSS_FLAG=True)
     plain, _ = omniray_caplog
