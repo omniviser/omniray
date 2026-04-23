@@ -83,17 +83,13 @@ def test_find_pyproject_returns_none_at_filesystem_root(tmp_path, monkeypatch, m
 
 def test_load_section_returns_dict(tmp_path):
     pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text(
-        '[tool.myapp]\nname = "foo"\ncount = 3\n', encoding="utf-8"
-    )
+    pyproject.write_text('[tool.myapp]\nname = "foo"\ncount = 3\n', encoding="utf-8")
     assert _load_section(("myapp",), pyproject) == {"name": "foo", "count": 3}
 
 
 def test_load_section_nested_keys(tmp_path):
     pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text(
-        '[tool.outer.inner]\nkey = "value"\n', encoding="utf-8"
-    )
+    pyproject.write_text('[tool.outer.inner]\nkey = "value"\n', encoding="utf-8")
     assert _load_section(("outer", "inner"), pyproject) == {"key": "value"}
 
 
@@ -181,9 +177,7 @@ def test_build_raw_config_post_init_validation_propagates():
 
 def test_load_pyproject_config_happy_path(tmp_path, monkeypatch, caplog):
     pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text(
-        '[tool.myapp]\nname = "foo"\ncount = 3\n', encoding="utf-8"
-    )
+    pyproject.write_text('[tool.myapp]\nname = "foo"\ncount = 3\n', encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     logger = logging.getLogger("test.myapp")
     with caplog.at_level(logging.WARNING, logger="test.myapp"):
@@ -196,9 +190,7 @@ def test_load_pyproject_config_explicit_path(tmp_path):
     pyproject = tmp_path / "custom.toml"
     pyproject.write_text('[tool.myapp]\nname = "bar"\n', encoding="utf-8")
     logger = logging.getLogger("test.myapp")
-    result = load_pyproject_config(
-        _Sample, ("myapp",), pyproject_path=pyproject, log=logger
-    )
+    result = load_pyproject_config(_Sample, ("myapp",), pyproject_path=pyproject, log=logger)
     assert result == _Sample(name="bar")
 
 
@@ -218,9 +210,7 @@ def test_load_pyproject_config_missing_section_returns_none(tmp_path, monkeypatc
     assert load_pyproject_config(_Sample, ("myapp",), log=logger) is None
 
 
-def test_load_pyproject_config_malformed_toml_warns_and_returns_none(
-    tmp_path, monkeypatch, caplog
-):
+def test_load_pyproject_config_malformed_toml_warns_and_returns_none(tmp_path, monkeypatch, caplog):
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[tool.myapp\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
@@ -246,13 +236,9 @@ def test_load_pyproject_config_post_init_validation_warns_and_returns_none(
     assert "non-negative" in caplog.text
 
 
-def test_load_pyproject_config_unknown_keys_warn_but_proceed(
-    tmp_path, monkeypatch, caplog
-):
+def test_load_pyproject_config_unknown_keys_warn_but_proceed(tmp_path, monkeypatch, caplog):
     pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text(
-        '[tool.myapp]\nname = "foo"\nbogus = 1\n', encoding="utf-8"
-    )
+    pyproject.write_text('[tool.myapp]\nname = "foo"\nbogus = 1\n', encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     logger = logging.getLogger("test.myapp")
     with caplog.at_level(logging.WARNING, logger="test.myapp"):
@@ -266,9 +252,7 @@ def test_load_pyproject_config_os_error_warns(tmp_path, monkeypatch, mocker, cap
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[tool.myapp]\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
-    mocker.patch(
-        "omniwrap.pyproject.tomllib.load", side_effect=OSError("disk fail")
-    )
+    mocker.patch("omniwrap.pyproject.tomllib.load", side_effect=OSError("disk fail"))
     logger = logging.getLogger("test.myapp")
     with caplog.at_level(logging.WARNING, logger="test.myapp"):
         result = load_pyproject_config(_Sample, ("myapp",), log=logger)
@@ -278,14 +262,10 @@ def test_load_pyproject_config_os_error_warns(tmp_path, monkeypatch, mocker, cap
 
 def test_load_pyproject_config_nested_section_path(tmp_path, monkeypatch):
     pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text(
-        '[tool.outer.inner]\nname = "nested"\n', encoding="utf-8"
-    )
+    pyproject.write_text('[tool.outer.inner]\nname = "nested"\n', encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     logger = logging.getLogger("test.myapp")
-    result = load_pyproject_config(
-        _Sample, ("outer", "inner"), log=logger
-    )
+    result = load_pyproject_config(_Sample, ("outer", "inner"), log=logger)
     assert result == _Sample(name="nested")
 
 

@@ -105,9 +105,7 @@ def test_rss_segment_with_delta_and_peak(monkeypatch, omniray_caplog):
     assert "\u0394" in line  # Δ segment present
     assert "max: " in line
 
-    match = re.search(
-        r"rss:\s*([\d.]+)MB \(\u0394[+-]?[\d.]+MB, max:\s*([\d.]+)MB\)", line
-    )
+    match = re.search(r"rss:\s*([\d.]+)MB \(\u0394[+-]?[\d.]+MB, max:\s*([\d.]+)MB\)", line)
     assert match is not None, f"rss segment not parseable in: {line!r}"
     current = float(match.group(1))
     peak = float(match.group(2))

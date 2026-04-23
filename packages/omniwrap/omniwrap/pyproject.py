@@ -130,7 +130,5 @@ def _build_raw_config[T](
     known_keys = {f.name for f in fields(raw_cls)}
     unknown = set(data.keys()) - known_keys
     if unknown:
-        (log or logger).warning(
-            "Unknown config keys (possible typo?): %s", unknown
-        )
-    return raw_cls(**{k: v for k, v in data.items() if k in known_keys})
+        (log or logger).warning("Unknown config keys (possible typo?): %s", unknown)
+    return raw_cls(**{k: v for k, v in data.items() if k in known_keys})  # type: ignore[return-value]

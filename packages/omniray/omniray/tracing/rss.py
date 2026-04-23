@@ -5,9 +5,14 @@ from __future__ import annotations
 import logging
 import os
 import sys
+from typing import TYPE_CHECKING
 
 import psutil
 
+if TYPE_CHECKING:
+    from types import ModuleType
+
+_resource: ModuleType | None
 try:
     import resource as _resource  # Unix only
 except ImportError:  # pragma: no cover — Windows path
@@ -59,9 +64,7 @@ def read_peak_rss_mb() -> float | None:
         return None
     try:
         return (
-            _resource.getrusage(_resource.RUSAGE_SELF).ru_maxrss
-            * _MAXRSS_TO_BYTES
-            / _BYTES_PER_MB
+            _resource.getrusage(_resource.RUSAGE_SELF).ru_maxrss * _MAXRSS_TO_BYTES / _BYTES_PER_MB
         )
     except Exception:  # noqa: BLE001
         logger.debug("omniray: getrusage failed", exc_info=True)

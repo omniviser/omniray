@@ -121,9 +121,7 @@ def test_empty_section_uses_defaults(tmp_path, monkeypatch):
 def test_explicit_path_bypasses_walk_up(tmp_path):
     """Passing ``pyproject_path`` skips the cwd walk-up entirely."""
     pyproject = tmp_path / "custom.toml"
-    pyproject.write_text(
-        "[tool.omniray]\nsize_big_tag_mb = 42\n", encoding="utf-8"
-    )
+    pyproject.write_text("[tool.omniray]\nsize_big_tag_mb = 42\n", encoding="utf-8")
     result = Thresholds.from_pyproject(pyproject)
     assert result.size_big_tag_mb == 42.0
 
@@ -143,9 +141,7 @@ def test_malformed_toml_warns_and_falls_back(tmp_path, monkeypatch, caplog):
 
 
 def test_wrong_type_warns_and_falls_back(tmp_path, monkeypatch, caplog):
-    (tmp_path / "pyproject.toml").write_text(
-        '[tool.omniray]\nsize = "foo"\n', encoding="utf-8"
-    )
+    (tmp_path / "pyproject.toml").write_text('[tool.omniray]\nsize = "foo"\n', encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     with caplog.at_level(logging.WARNING, logger="omniray.tracing"):
         result = Thresholds.from_pyproject()
@@ -155,9 +151,7 @@ def test_wrong_type_warns_and_falls_back(tmp_path, monkeypatch, caplog):
 
 
 def test_wrong_length_warns_and_falls_back(tmp_path, monkeypatch, caplog):
-    (tmp_path / "pyproject.toml").write_text(
-        "[tool.omniray]\nsize = [1, 2]\n", encoding="utf-8"
-    )
+    (tmp_path / "pyproject.toml").write_text("[tool.omniray]\nsize = [1, 2]\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     with caplog.at_level(logging.WARNING, logger="omniray.tracing"):
         result = Thresholds.from_pyproject()

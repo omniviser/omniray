@@ -132,9 +132,7 @@ def test_log_span_success_rss_current_and_delta_positive(mocker, strip_ansi):
     """Both rss values → 'rss: X.XXMB (ΔY.YYMB)' rendered."""
     mock_logger = mocker.patch("omniray.tracing.profilers.logger")
 
-    profilers.log_span_success(
-        "test_span", 5.5, 0, rss_current_mb=234.5, rss_delta_mb=12.34
-    )
+    profilers.log_span_success("test_span", 5.5, 0, rss_current_mb=234.5, rss_delta_mb=12.34)
 
     plain = strip_ansi(_rendered(mock_logger))
     assert "rss: 234.50MB" in plain
@@ -145,9 +143,7 @@ def test_log_span_success_rss_negative_delta_renders_minus(mocker, strip_ansi):
     """Negative delta renders 'Δ-X.XXMB'."""
     mock_logger = mocker.patch("omniray.tracing.profilers.logger")
 
-    profilers.log_span_success(
-        "test_span", 5.5, 0, rss_current_mb=100.0, rss_delta_mb=-5.0
-    )
+    profilers.log_span_success("test_span", 5.5, 0, rss_current_mb=100.0, rss_delta_mb=-5.0)
 
     plain = strip_ansi(_rendered(mock_logger))
     assert "\u0394-5.00MB" in plain
@@ -185,9 +181,7 @@ def test_log_span_success_rss_peak_only(mocker):
     """rss_current + rss_peak (no delta) → '(max: X.XXMB)' without Δ."""
     mock_logger = mocker.patch("omniray.tracing.profilers.logger")
 
-    profilers.log_span_success(
-        "test_span", 5.5, 0, rss_current_mb=100.0, rss_peak_mb=3000.0
-    )
+    profilers.log_span_success("test_span", 5.5, 0, rss_current_mb=100.0, rss_peak_mb=3000.0)
 
     rendered = _rendered(mock_logger)
     assert "max: " in rendered
@@ -242,9 +236,7 @@ def test_log_span_success_delta_negative_rendered_dim(mocker, monkeypatch):
     monkeypatch.setattr(profilers, "_THRESHOLDS", _DEFAULT_THRESHOLDS)
     mock_logger = mocker.patch("omniray.tracing.profilers.logger")
 
-    profilers.log_span_success(
-        "test_span", 5.0, 0, rss_current_mb=100.0, rss_delta_mb=-5.0
-    )
+    profilers.log_span_success("test_span", 5.0, 0, rss_current_mb=100.0, rss_delta_mb=-5.0)
 
     rendered = _rendered(mock_logger)
     # Find the delta segment and check the color code preceding its value.

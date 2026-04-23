@@ -146,7 +146,7 @@ def _setup_size_mocks(mocker, *, input_size_flag, output_size_flag):
 
 def test_trace_sync_size_flags_off_passes_none(mocker):
     """Both size flags off → log_span_success called with both kwargs=None."""
-    mock_profiler = _setup_size_mocks(mocker,input_size_flag=False, output_size_flag=False)
+    mock_profiler = _setup_size_mocks(mocker, input_size_flag=False, output_size_flag=False)
     mock_measure = mocker.patch("omniray.tracing.tracers.measure_size_mb")
 
     def sample_func():
@@ -162,7 +162,7 @@ def test_trace_sync_size_flags_off_passes_none(mocker):
 
 def test_trace_sync_input_size_flag_on_passes_to_profiler(mocker):
     """input_size flag on → log_span_success receives input_size_mb from measure_size_mb."""
-    mock_profiler = _setup_size_mocks(mocker,input_size_flag=True, output_size_flag=False)
+    mock_profiler = _setup_size_mocks(mocker, input_size_flag=True, output_size_flag=False)
     mock_measure = mocker.patch("omniray.tracing.tracers.measure_size_mb", side_effect=[0.1])
 
     def sample_func(_x):
@@ -178,7 +178,7 @@ def test_trace_sync_input_size_flag_on_passes_to_profiler(mocker):
 
 def test_trace_sync_output_size_flag_on_passes_to_profiler(mocker):
     """output_size flag on → log_span_success receives output_size_mb from measure_size_mb."""
-    mock_profiler = _setup_size_mocks(mocker,input_size_flag=False, output_size_flag=True)
+    mock_profiler = _setup_size_mocks(mocker, input_size_flag=False, output_size_flag=True)
     mock_measure = mocker.patch("omniray.tracing.tracers.measure_size_mb", side_effect=[2.5])
 
     def sample_func():
@@ -194,7 +194,7 @@ def test_trace_sync_output_size_flag_on_passes_to_profiler(mocker):
 
 def test_trace_sync_both_size_flags_on_passes_both(mocker):
     """Both size flags on → both kwargs populated; input measured before output."""
-    mock_profiler = _setup_size_mocks(mocker,input_size_flag=True, output_size_flag=True)
+    mock_profiler = _setup_size_mocks(mocker, input_size_flag=True, output_size_flag=True)
     mock_measure = mocker.patch("omniray.tracing.tracers.measure_size_mb", side_effect=[0.1, 2.5])
 
     def sample_func(_x):
@@ -211,7 +211,7 @@ def test_trace_sync_both_size_flags_on_passes_both(mocker):
 
 def test_trace_sync_output_size_on_exception_not_measured(mocker):
     """Function raises → log_span_success not called, measure_size_mb not called for result."""
-    mock_profiler = _setup_size_mocks(mocker,input_size_flag=False, output_size_flag=True)
+    mock_profiler = _setup_size_mocks(mocker, input_size_flag=False, output_size_flag=True)
     mock_measure = mocker.patch("omniray.tracing.tracers.measure_size_mb")
 
     def failing_func():
@@ -231,9 +231,7 @@ def test_trace_sync_output_size_on_exception_not_measured(mocker):
 
 @pytest.mark.asyncio
 async def test_trace_async_input_size_flag_on_passes_to_profiler(mocker):
-    mock_profiler = _setup_size_mocks(
-        mocker, input_size_flag=True, output_size_flag=False
-    )
+    mock_profiler = _setup_size_mocks(mocker, input_size_flag=True, output_size_flag=False)
     mock_measure = mocker.patch("omniray.tracing.tracers.measure_size_mb", side_effect=[0.1])
 
     async def async_func(_x):
@@ -250,9 +248,7 @@ async def test_trace_async_input_size_flag_on_passes_to_profiler(mocker):
 
 @pytest.mark.asyncio
 async def test_trace_async_output_size_flag_on_passes_to_profiler(mocker):
-    mock_profiler = _setup_size_mocks(
-        mocker, input_size_flag=False, output_size_flag=True
-    )
+    mock_profiler = _setup_size_mocks(mocker, input_size_flag=False, output_size_flag=True)
     mock_measure = mocker.patch("omniray.tracing.tracers.measure_size_mb", side_effect=[2.5])
 
     async def async_func():
@@ -268,9 +264,7 @@ async def test_trace_async_output_size_flag_on_passes_to_profiler(mocker):
 
 @pytest.mark.asyncio
 async def test_trace_async_both_size_flags_on_passes_both(mocker):
-    mock_profiler = _setup_size_mocks(
-        mocker, input_size_flag=True, output_size_flag=True
-    )
+    mock_profiler = _setup_size_mocks(mocker, input_size_flag=True, output_size_flag=True)
     mock_measure = mocker.patch("omniray.tracing.tracers.measure_size_mb", side_effect=[0.1, 2.5])
 
     async def async_func(_x):
@@ -299,7 +293,7 @@ def _setup_rss_mocks(mocker, *, rss_flag):
 
 def test_trace_sync_rss_flag_off_skips_measurement(mocker):
     """log_rss off → rss readers not called; rss kwargs None on profiler call."""
-    mock_profiler = _setup_rss_mocks(mocker,rss_flag=False)
+    mock_profiler = _setup_rss_mocks(mocker, rss_flag=False)
     mock_read = mocker.patch("omniray.tracing.tracers.read_rss_mb")
     mock_peak = mocker.patch("omniray.tracing.tracers.read_peak_rss_mb")
 
@@ -318,11 +312,9 @@ def test_trace_sync_rss_flag_off_skips_measurement(mocker):
 
 def test_trace_sync_rss_flag_on_passes_peak(mocker):
     """log_rss on → read_peak_rss_mb called after wrapped; value reaches profiler."""
-    mock_profiler = _setup_rss_mocks(mocker,rss_flag=True)
+    mock_profiler = _setup_rss_mocks(mocker, rss_flag=True)
     mocker.patch("omniray.tracing.tracers.read_rss_mb", side_effect=[10.0, 12.0])
-    mock_peak = mocker.patch(
-        "omniray.tracing.tracers.read_peak_rss_mb", return_value=3000.5
-    )
+    mock_peak = mocker.patch("omniray.tracing.tracers.read_peak_rss_mb", return_value=3000.5)
 
     def sample_func():
         return "ok"
@@ -336,7 +328,7 @@ def test_trace_sync_rss_flag_on_passes_peak(mocker):
 
 def test_trace_sync_rss_peak_raised_to_current_when_kernel_lags(mocker):
     """Linux kernel can report ru_maxrss < current RSS briefly — enforce peak >= current."""
-    mock_profiler = _setup_rss_mocks(mocker,rss_flag=True)
+    mock_profiler = _setup_rss_mocks(mocker, rss_flag=True)
     mocker.patch("omniray.tracing.tracers.read_rss_mb", side_effect=[100.0, 196.42])
     mocker.patch("omniray.tracing.tracers.read_peak_rss_mb", return_value=195.88)
 
@@ -352,10 +344,8 @@ def test_trace_sync_rss_peak_raised_to_current_when_kernel_lags(mocker):
 
 def test_trace_sync_rss_flag_on_passes_current_and_delta(mocker):
     """log_rss on → profiler receives rss_current_mb and computed delta."""
-    mock_profiler = _setup_rss_mocks(mocker,rss_flag=True)
-    mock_read = mocker.patch(
-        "omniray.tracing.tracers.read_rss_mb", side_effect=[100.0, 112.34]
-    )
+    mock_profiler = _setup_rss_mocks(mocker, rss_flag=True)
+    mock_read = mocker.patch("omniray.tracing.tracers.read_rss_mb", side_effect=[100.0, 112.34])
 
     def sample_func():
         return "ok"
@@ -370,10 +360,8 @@ def test_trace_sync_rss_flag_on_passes_current_and_delta(mocker):
 
 def test_trace_sync_rss_flag_on_exception_skips_after(mocker):
     """Exception → read_rss_mb called only for before; log_span_success not called."""
-    mock_profiler = _setup_rss_mocks(mocker,rss_flag=True)
-    mock_read = mocker.patch(
-        "omniray.tracing.tracers.read_rss_mb", side_effect=[100.0]
-    )
+    mock_profiler = _setup_rss_mocks(mocker, rss_flag=True)
+    mock_read = mocker.patch("omniray.tracing.tracers.read_rss_mb", side_effect=[100.0])
 
     def failing_func():
         msg = "boom"
@@ -389,10 +377,8 @@ def test_trace_sync_rss_flag_on_exception_skips_after(mocker):
 @pytest.mark.asyncio
 async def test_trace_async_rss_flag_on_passes_current_and_delta(mocker):
     """Async mirror: rss on → current + delta reach profiler."""
-    mock_profiler = _setup_rss_mocks(mocker,rss_flag=True)
-    mock_read = mocker.patch(
-        "omniray.tracing.tracers.read_rss_mb", side_effect=[50.0, 75.5]
-    )
+    mock_profiler = _setup_rss_mocks(mocker, rss_flag=True)
+    mock_read = mocker.patch("omniray.tracing.tracers.read_rss_mb", side_effect=[50.0, 75.5])
 
     async def async_func():
         await asyncio.sleep(0)
@@ -408,7 +394,7 @@ async def test_trace_async_rss_flag_on_passes_current_and_delta(mocker):
 
 def test_trace_sync_rss_read_fails_gracefully(mocker):
     """read_rss_mb returning None → profiler gets both rss kwargs as None."""
-    mock_profiler = _setup_rss_mocks(mocker,rss_flag=True)
+    mock_profiler = _setup_rss_mocks(mocker, rss_flag=True)
     mocker.patch("omniray.tracing.tracers.read_rss_mb", return_value=None)
 
     def sample_func():

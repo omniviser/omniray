@@ -29,6 +29,7 @@ def omniray_caplog(strip_ansi):
     logger.setLevel(logging.DEBUG)
     logger.addHandler(handler)
     try:
+
         def plain() -> list[str]:
             return [strip_ansi(line) for line in buf.getvalue().splitlines()]
 

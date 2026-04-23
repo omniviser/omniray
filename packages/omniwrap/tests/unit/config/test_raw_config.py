@@ -1,6 +1,4 @@
-"""Tests for RawConfig dataclass validation (``__post_init__``).
-
-"""
+"""Tests for RawConfig dataclass validation (``__post_init__``)."""
 
 import pytest
 from omniwrap.config import RawConfig
@@ -63,5 +61,3 @@ def test_valid_values_pass_validation(paths, exclude):
 
     assert config.paths == paths
     assert config.exclude == exclude
-
-

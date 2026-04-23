@@ -46,9 +46,6 @@ NEST_END = "│  └─ " if _USE_UNICODE else "|  \\- "
 DELTA = "Δ" if _USE_UNICODE else "d"
 
 
-
-
-
 def log_span_success(  # noqa: PLR0913
     span_name: str,
     duration_ms: float,
@@ -107,7 +104,6 @@ def get_indent(depth: int, *, is_start: bool = True) -> str:
     return prefix + (NEST_START if is_start else NEST_END)
 
 
-
 def _colored(color: str, text: str) -> str:
     """Wrap *text* in *color* with a trailing style reset."""
     return f"{color}{text}{Style.RESET_ALL}"
@@ -125,17 +121,13 @@ def _bucket_color(value: float, thresholds: tuple[float, float, float]) -> str:
     return Fore.RED + Style.BRIGHT
 
 
-def _format_mb(
-    value: float, thresholds: tuple[float, float, float], *, sign: bool = False
-) -> str:
+def _format_mb(value: float, thresholds: tuple[float, float, float], *, sign: bool = False) -> str:
     """Return a colored ``X.XXMB`` string; ``sign=True`` forces a leading +/-."""
     spec = f"{value:+.2f}" if sign else f"{value:.2f}"
     return _colored(_bucket_color(value, thresholds), f"{spec}MB")
 
 
-def _format_rss_extras(
-    rss_delta_mb: float | None, rss_peak_mb: float | None
-) -> str:
+def _format_rss_extras(rss_delta_mb: float | None, rss_peak_mb: float | None) -> str:
     """Build the ``Δ..., max: ...`` group (empty string when both inputs are ``None``)."""
     extras: list[str] = []
     if rss_delta_mb is not None:
