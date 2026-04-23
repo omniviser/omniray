@@ -13,6 +13,7 @@ import time
 from contextvars import ContextVar
 from typing import TYPE_CHECKING
 
+from omniray.tracing import profilers
 from omniray.tracing.console import logger, setup_console_handler
 from omniray.tracing.flags import CONSOLE_LOG_FLAG, TraceFlags, resolve_trace_flags
 from omniray.tracing.io_loggers import IOLogger
@@ -25,7 +26,6 @@ from omniray.tracing.otel import (
     StatusCode,
     otel_tracer,
 )
-from omniray.tracing.profilers import SpanProfiler
 from omniray.tracing.rss import read_peak_rss_mb, read_rss_mb
 from omniray.tracing.sizing import measure_size_mb
 from omniray.tracing.span_name_generator import SpanNameGenerator
@@ -47,7 +47,6 @@ if CONSOLE_LOG_FLAG is True:
 class Tracer:
     """Orchestrates console profiling and OpenTelemetry span creation."""
 
-    profiler = SpanProfiler()
     io_logger = IOLogger()
 
     @classmethod
@@ -170,7 +169,7 @@ class Tracer:
         # Enforce the invariant peak >= current in the app layer.
         if rss_peak_mb is not None and rss_current_mb is not None:
             rss_peak_mb = max(rss_peak_mb, rss_current_mb)
-        cls.profiler.log_span_success(
+        profilers.log_span_success(
             span_name,
             duration_ms,
             current_depth,
@@ -182,7 +181,7 @@ class Tracer:
         )
         if flags.log_output:
             cls.io_logger.log_output(result, current_depth)
-        cls.profiler.log_section_separator(current_depth)
+        profilers.log_section_separator(current_depth)
 
     @classmethod
     def _finish_tracing_failure(  # noqa: PLR0913
@@ -197,7 +196,7 @@ class Tracer:
         """Handle failed trace completion."""
         if flags.log:
             duration_ms = duration_s * 1000
-            cls.profiler.log_span_failure(span_name, duration_ms, current_depth)
+            profilers.log_span_failure(span_name, duration_ms, current_depth)
         if flags.otel:
             cls._trace_span_error(span, exception)
 
@@ -233,7 +232,7 @@ class Tracer:
         """Update call depth and log span start."""
         current_depth = _call_depth.get()
         _call_depth.set(current_depth + 1)
-        indent = cls.profiler.get_indent(current_depth, is_start=True)
+        indent = profilers.get_indent(current_depth, is_start=True)
         logger.info("%s%s", indent, span_name)
         return current_depth
 

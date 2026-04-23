@@ -95,7 +95,7 @@ def test_setup_trace_no_input_logging(mocker):
 
 def test_finish_tracing_logging_disabled(mocker):
     """Test _finish_tracing does nothing when log=False."""
-    mock_profiler = mocker.patch.object(Tracer, "profiler")
+    mock_profiler = mocker.patch("omniray.tracing.tracers.profilers")
     flags = TraceFlags(
         log=False,
         log_input=True,
@@ -113,7 +113,7 @@ def test_finish_tracing_logging_disabled(mocker):
 
 def test_finish_tracing_logging_enabled(mocker):
     """Test _finish_tracing logs when log=True."""
-    mock_profiler = mocker.patch.object(Tracer, "profiler")
+    mock_profiler = mocker.patch("omniray.tracing.tracers.profilers")
     mock_io_logger = mocker.patch.object(Tracer, "io_logger")
     flags = TraceFlags(
         log=True,
@@ -143,7 +143,7 @@ def test_finish_tracing_logging_enabled(mocker):
 
 def test_finish_tracing_no_output_logging(mocker):
     """Test _finish_tracing skips output logging when disabled."""
-    mock_profiler = mocker.patch.object(Tracer, "profiler")
+    mock_profiler = mocker.patch("omniray.tracing.tracers.profilers")
     mock_io_logger = mocker.patch.object(Tracer, "io_logger")
     flags = TraceFlags(
         log=True,
@@ -166,7 +166,7 @@ def test_finish_tracing_no_output_logging(mocker):
 
 def test_finish_tracing_failure_logging_enabled(mocker):
     """Test _finish_tracing_failure logs when log=True."""
-    mock_profiler = mocker.patch.object(Tracer, "profiler")
+    mock_profiler = mocker.patch("omniray.tracing.tracers.profilers")
     mock_span = mocker.MagicMock()
     exception = ValueError("test")
     flags = TraceFlags(
@@ -186,7 +186,7 @@ def test_finish_tracing_failure_logging_enabled(mocker):
 
 def test_finish_tracing_failure_logging_disabled(mocker):
     """Test _finish_tracing_failure skips logging when log=False."""
-    mock_profiler = mocker.patch.object(Tracer, "profiler")
+    mock_profiler = mocker.patch("omniray.tracing.tracers.profilers")
     mock_span = mocker.MagicMock()
     exception = ValueError("test")
     flags = TraceFlags(
@@ -211,7 +211,7 @@ def test_finish_tracing_failure_logging_disabled(mocker):
 def test_update_depth(mocker):
     """Test _update_depth increments depth and logs."""
     mocker.patch("omniray.tracing.tracers.logger")
-    mock_profiler = mocker.patch.object(Tracer, "profiler")
+    mock_profiler = mocker.patch("omniray.tracing.tracers.profilers")
     # Mock _call_depth to avoid context isolation issues with pytest-asyncio
     mock_call_depth = mocker.patch("omniray.tracing.tracers._call_depth")
     initial_depth = 2

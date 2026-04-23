@@ -1,42 +1,18 @@
-"""Tests for getting pyproject config methods."""
+"""Integration tests for ``DiscoveryConfig.from_pyproject`` end-to-end flow.
+
+Low-level pyproject primitives (``_find_pyproject_toml``, ``_load_section``,
+``_build_raw_config``, ``load_pyproject_config``) are covered in
+``tests/unit/test_pyproject.py``. The tests here exercise the full
+``pyproject.toml`` → ``RawConfig`` → ``DiscoveryConfig`` pipeline with real
+files on disk.
+"""
 
 import logging
-import tomllib
 
 import pytest
 from omniwrap.config import DiscoveryConfig
 
 pytestmark = pytest.mark.integration
-
-
-@pytest.mark.usefixtures("chdir_to_tmp")
-def test_finds_pyproject_in_cwd(tmp_path):
-    """Test that pyproject.toml in current directory is found.
-
-    Most common case - running from project root.
-    """
-    pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text('[project]\nname = "test"\n')
-
-    result = DiscoveryConfig._find_pyproject_toml()
-
-    assert result == pyproject
-
-
-@pytest.mark.usefixtures("chdir_to_tmp")
-def test_stops_search_at_git_directory(tmp_path):
-    """Test that search stops at .git directory (VCS root).
-
-    Following Black's approach - don't search above VCS root. This prevents
-    finding unrelated pyproject.toml in parent projects (monorepo case).
-    """
-    subdir = tmp_path / "subdir"
-    subdir.mkdir()
-    (tmp_path / ".git").mkdir()
-
-    result = DiscoveryConfig._find_pyproject_toml()
-
-    assert result is None
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -71,30 +47,42 @@ def test_full_configuration_merged(create_pyproject):
     assert ".venv" in config.exclude  # Default preserved
 
 
-def test_invalid_toml_syntax_raises_decode_error(tmp_path):
-    """Test that malformed TOML raises TOMLDecodeError.
+def test_invalid_toml_syntax_warns_and_returns_defaults(tmp_path, caplog):
+    """Malformed TOML → WARNING logged, defaults returned. Never raises.
 
-    Users should get a clear error when their TOML syntax is invalid.
+    Previously this raised ``TOMLDecodeError`` — behaviour now unified with
+    omniray: broken config never crashes the host app.
     """
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[tool.omniwrap\n")  # Missing closing bracket
 
-    with pytest.raises(tomllib.TOMLDecodeError):
-        DiscoveryConfig.from_pyproject(pyproject)
-
-
-def test_no_tool_section_logs_debug(create_pyproject, caplog):
-    """Test that missing [tool.omniwrap] section logs debug message.
-
-    Projects may have pyproject.toml for other tools but not configure omniwrap.
-    """
-    pyproject_path = create_pyproject(include_tool_section=False)
-
-    with caplog.at_level(logging.DEBUG, logger="omniwrap.config"):
-        config = DiscoveryConfig.from_pyproject(pyproject_path)
+    with caplog.at_level(logging.WARNING, logger="omniwrap.config"):
+        config = DiscoveryConfig.from_pyproject(pyproject)
 
     assert config == DiscoveryConfig()
-    assert "No [tool.omniwrap] section" in caplog.text
+    assert "Failed to parse pyproject.toml" in caplog.text
+
+
+def test_invalid_types_warn_and_return_defaults(tmp_path, caplog):
+    """Wrong field types → WARNING logged, defaults returned. Never raises."""
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text('[tool.omniwrap]\npaths = "not-a-list"\n')
+
+    with caplog.at_level(logging.WARNING, logger="omniwrap.config"):
+        config = DiscoveryConfig.from_pyproject(pyproject)
+
+    assert config == DiscoveryConfig()
+    assert "Invalid [tool.omniwrap] config" in caplog.text
+    assert "must be a list" in caplog.text
+
+
+def test_no_tool_section_returns_defaults(create_pyproject):
+    """Projects may have pyproject.toml for other tools but not configure omniwrap."""
+    pyproject_path = create_pyproject(include_tool_section=False)
+
+    config = DiscoveryConfig.from_pyproject(pyproject_path)
+
+    assert config == DiscoveryConfig()
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -111,17 +99,3 @@ def test_skip_wrap_loaded_from_pyproject(create_pyproject):
     config = DiscoveryConfig.from_pyproject(pyproject_path)
 
     assert config.skip_wrap == frozenset({"to_pydantic", "to_dict"})
-    assert config.skip_wrap == frozenset({"to_pydantic", "to_dict"})
-
-
-def test_returns_none_at_filesystem_root(tmp_path, monkeypatch):
-    """Test that search returns None when reaching filesystem root.
-
-    Edge case: no pyproject.toml and no VCS directory anywhere in path.
-    """
-    monkeypatch.chdir(tmp_path)
-    # No .git, no pyproject.toml - will traverse up to root
-
-    result = DiscoveryConfig._find_pyproject_toml()
-
-    assert result is None

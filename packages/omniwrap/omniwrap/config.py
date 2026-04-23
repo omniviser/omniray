@@ -1,14 +1,22 @@
 """Configuration system for omniwrap module.
 
-This module provides configuration loading from pyproject.toml following the standard pattern used
-by tools like pytest, coverage.py, and black.
+Reads ``[tool.omniwrap]`` of the nearest ``pyproject.toml``. The shared
+``pyproject.toml`` loading primitives live in :mod:`omniwrap.pyproject`
+so other ecosystem libraries can reuse them.
+
+Error behaviour: any failure (missing file, malformed TOML, wrong types
+in :class:`RawConfig`) is logged at ``WARNING`` and :meth:`DiscoveryConfig.from_pyproject`
+returns defaults. Direct construction of :class:`RawConfig` with invalid
+types still raises :class:`RawConfig.ConfigError` — that's the developer-facing
+contract of the raw dataclass.
 """
 
 import logging
-import tomllib
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from fnmatch import fnmatch
 from pathlib import Path
+
+from omniwrap.pyproject import load_pyproject_config
 
 logger = logging.getLogger(__name__)
 
@@ -41,15 +49,6 @@ class RawConfig:
                 msg = f"{name} must contain only strings, got {type(item).__name__}"
                 raise self.ConfigError(msg)
 
-    @classmethod
-    def from_dict(cls, data: dict) -> "RawConfig":
-        """Create from dict, warning about unknown keys."""
-        known_keys = {f.name for f in fields(cls)}
-        unknown = set(data.keys()) - known_keys
-        if unknown:
-            logger.warning("Unknown config keys (possible typo?): %s", unknown)
-        return cls(**{k: v for k, v in data.items() if k in known_keys})
-
 
 @dataclass(frozen=True)
 class DiscoveryConfig:
@@ -61,10 +60,10 @@ class DiscoveryConfig:
         exclude = ["tests", "scripts", "data"]
 
     Example usage:
-        # Load from pyproject.toml
+        # Load from pyproject.toml (or defaults if missing / malformed)
         config = DiscoveryConfig.from_pyproject()
 
-        # Or use defaults (field defaults)
+        # Explicit defaults
         config = DiscoveryConfig()
     """
 
@@ -116,25 +115,20 @@ class DiscoveryConfig:
     @classmethod
     def from_pyproject(cls, pyproject_path: Path | None = None) -> "DiscoveryConfig":
         """Load configuration from pyproject.toml."""
-        if pyproject_path is None:
-            pyproject_path = cls._find_pyproject_toml()
-        if pyproject_path is None or not pyproject_path.exists():
-            logger.warning("No pyproject.toml found, using defaults")
-            return cls()
-        return cls._load_from_pyproject(pyproject_path)
-
-    @classmethod
-    def _load_from_pyproject(cls, pyproject_path: Path) -> "DiscoveryConfig":
-        """Load and merge configuration from pyproject.toml."""
-        raw_config = cls._get_lib_config(pyproject_path)
-        if raw_config is None:
-            logger.debug("No [tool.omniwrap] section, using defaults")
+        raw = load_pyproject_config(
+            RawConfig,
+            ("omniwrap",),
+            pyproject_path=pyproject_path,
+            log=logger,
+        )
+        if raw is None:
             return cls()
         default_config = cls()
-        paths = cls._merge_paths(raw_config, default_config)
-        exclude = cls._merge_excludes(raw_config, default_config)
-        skip_wrap = cls._merge_skip_wrap(raw_config)
-        return cls(paths=paths, exclude=exclude, skip_wrap=skip_wrap)
+        return cls(
+            paths=cls._merge_paths(raw, default_config),
+            exclude=cls._merge_excludes(raw, default_config),
+            skip_wrap=cls._merge_skip_wrap(raw),
+        )
 
     @staticmethod
     def _merge_paths(raw_config: RawConfig, default_config: "DiscoveryConfig") -> tuple[Path, ...]:
@@ -159,36 +153,6 @@ class DiscoveryConfig:
         if raw_config.skip_wrap:
             return frozenset(raw_config.skip_wrap)
         return frozenset()
-
-    @staticmethod
-    def _get_lib_config(pyproject_path: Path) -> RawConfig | None:
-        """Load and validate configuration from pyproject.toml."""
-        with pyproject_path.open("rb") as f:
-            data = tomllib.load(f)
-        raw_dict = data.get("tool", {}).get("omniwrap", {})
-        if not raw_dict:
-            return None
-        return RawConfig.from_dict(raw_dict)
-
-    @staticmethod
-    def _find_pyproject_toml() -> Path | None:
-        """Find pyproject.toml by walking up from cwd.
-
-        Uses Black's approach: walks up until finding config or VCS root.
-        """
-        directory = Path.cwd().resolve()
-        while True:
-            candidate = directory / "pyproject.toml"
-            if candidate.exists():
-                logger.debug("Found pyproject.toml at: %s", candidate)
-                return candidate
-            if (directory / ".git").exists() or (directory / ".hg").exists():
-                logger.debug("Stopped at VCS root: %s", directory)
-                return None
-            parent = directory.parent
-            if parent == directory:  # Reached filesystem root
-                return None
-            directory = parent
 
     @staticmethod
     def _resolve_path(path_str: str) -> Path:
