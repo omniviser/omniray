@@ -10,15 +10,17 @@ def test_measure_size_mb_none_returns_none():
 
 
 def test_measure_size_mb_small_dict_returns_positive_float():
+    small_dict_upper_mb = 0.01  # <10KB
     result = measure_size_mb({"a": 1, "b": "x"})
     assert isinstance(result, float)
-    assert 0 < result < 0.01
+    assert 0 < result < small_dict_upper_mb
 
 
 def test_measure_size_mb_bytes_5mb_returns_approx_5():
-    payload = b"x" * (5 * 1024 * 1024)
+    payload_mb = 5
+    payload = b"x" * (payload_mb * 1024 * 1024)
     result = measure_size_mb(payload)
-    assert result == pytest.approx(5.0, abs=0.01)
+    assert result == pytest.approx(float(payload_mb), abs=0.01)
 
 
 def test_measure_size_mb_catches_asizeof_exceptions(mocker):

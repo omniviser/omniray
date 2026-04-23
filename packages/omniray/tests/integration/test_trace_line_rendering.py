@@ -75,10 +75,11 @@ def test_input_output_size_rendered(monkeypatch, omniray_caplog):
         LOG_OUTPUT_SIZE_FLAG=True,
     )
     plain, _ = omniray_caplog
+    out_mb = 2
 
     @trace()
     def echo(_x):
-        return b"y" * (2 * 1024 * 1024)
+        return b"y" * (out_mb * 1024 * 1024)
 
     echo(b"x" * (1 * 1024 * 1024))
 
@@ -89,7 +90,7 @@ def test_input_output_size_rendered(monkeypatch, omniray_caplog):
     assert "rss:" not in line
     match_out = re.search(r"out:\s*([\d.]+)MB", line)
     assert match_out is not None
-    assert float(match_out.group(1)) >= 2.0  # ~2 MB returned
+    assert float(match_out.group(1)) >= float(out_mb)
 
 
 @pytest.mark.skipif(_rss_resource is None, reason="peak RSS requires POSIX resource module")

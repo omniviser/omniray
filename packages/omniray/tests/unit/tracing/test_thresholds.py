@@ -76,26 +76,28 @@ def test_defaults_when_no_pyproject(tmp_path, monkeypatch):
 
 
 def test_parses_full_config(tmp_path, monkeypatch):
+    expected_size_big_tag_mb = 3.0
+    expected_duration_slow_tag_ms = 500.0
     (tmp_path / "pyproject.toml").write_text(
-        """
+        f"""
 [tool.omniray]
 size = [0.01, 0.5, 5.0]
-size_big_tag_mb = 3
+size_big_tag_mb = {expected_size_big_tag_mb}
 rss = [50, 200, 800]
 rss_delta = [0.5, 5.0, 50.0]
 duration_ms = [2, 20, 200]
-duration_slow_tag_ms = 500
+duration_slow_tag_ms = {expected_duration_slow_tag_ms}
 """,
         encoding="utf-8",
     )
     monkeypatch.chdir(tmp_path)
     result = Thresholds.from_pyproject()
     assert result.size_mb == (0.01, 0.5, 5.0)
-    assert result.size_big_tag_mb == 3.0
+    assert result.size_big_tag_mb == expected_size_big_tag_mb
     assert result.rss_mb == (50.0, 200.0, 800.0)
     assert result.rss_delta_mb == (0.5, 5.0, 50.0)
     assert result.duration_ms == (2.0, 20.0, 200.0)
-    assert result.duration_slow_tag_ms == 500.0
+    assert result.duration_slow_tag_ms == expected_duration_slow_tag_ms
 
 
 def test_partial_override_keeps_defaults(tmp_path, monkeypatch):
@@ -120,10 +122,13 @@ def test_empty_section_uses_defaults(tmp_path, monkeypatch):
 
 def test_explicit_path_bypasses_walk_up(tmp_path):
     """Passing ``pyproject_path`` skips the cwd walk-up entirely."""
+    expected_size_big_tag_mb = 42.0
     pyproject = tmp_path / "custom.toml"
-    pyproject.write_text("[tool.omniray]\nsize_big_tag_mb = 42\n", encoding="utf-8")
+    pyproject.write_text(
+        f"[tool.omniray]\nsize_big_tag_mb = {expected_size_big_tag_mb}\n", encoding="utf-8"
+    )
     result = Thresholds.from_pyproject(pyproject)
-    assert result.size_big_tag_mb == 42.0
+    assert result.size_big_tag_mb == expected_size_big_tag_mb
 
 
 def test_nonexistent_explicit_path_falls_back(tmp_path):
