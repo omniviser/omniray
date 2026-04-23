@@ -8,7 +8,7 @@
 | `config` | `DiscoveryConfig \| None` | Custom config (default: load from pyproject.toml) |
 | `enabled` | `bool \| None` | `True` = always, `False` = never, `None` = read `OMNIWRAP` env var |
 
-## `@trace(*, log, log_input, log_output, skip_if, otel)`
+## `@trace(*, log, log_input, log_output, log_input_size, log_output_size, log_rss, skip_if, otel)`
 
 Decorator for manual per-function instrumentation. Works on both sync and async functions.
 
@@ -17,10 +17,13 @@ Decorator for manual per-function instrumentation. Works on both sync and async 
 | `log` | `bool \| None` | `None` | Override `OMNIRAY_LOG` per-function |
 | `log_input` | `bool \| None` | `None` | Override `OMNIRAY_LOG_INPUT` |
 | `log_output` | `bool \| None` | `None` | Override `OMNIRAY_LOG_OUTPUT` |
+| `log_input_size` | `bool \| None` | `None` | Override `OMNIRAY_LOG_INPUT_SIZE` |
+| `log_output_size` | `bool \| None` | `None` | Override `OMNIRAY_LOG_OUTPUT_SIZE` |
+| `log_rss` | `bool \| None` | `None` | Override `OMNIRAY_LOG_RSS` |
 | `skip_if` | `Callable[..., bool] \| None` | `None` | Predicate receiving function args; skip tracing when `True` |
 | `otel` | `bool \| None` | `None` | Override `OMNIRAY_OTEL` |
 
-## `create_trace_wrapper(*, log, log_input, log_output, skip_if, otel)`
+## `create_trace_wrapper(*, log, log_input, log_output, log_input_size, log_output_size, log_rss, skip_if, otel)`
 
 Factory that returns `tuple[Callable, Callable]` — a `(sync_wrapper, async_wrapper)` pair for use with `wrap_all()`. Parameters are identical to `@trace`.
 
