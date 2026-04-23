@@ -13,8 +13,7 @@
 [![Docs](https://img.shields.io/badge/docs-blue)](https://omniviser.github.io/omniray/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-**Stop guessing! Debug effortlessly!**<br>
-**You and your AI can now see anything.**
+**One call, and you see everything that's happening in your code.**
 
 Meet omniray — OMNIVISER's X-RAY
 
@@ -26,7 +25,7 @@ Built and battle-tested at [OMNIVISER](https://omniviser.ai).
 
 ## How it works
 
-> Demo app built to show omniray in action — every function call traced live with timing and I/O.
+> Demo app built to show omniray(v1.0) in action — every function call traced live with timing and I/O.
 
 <p align="center">
   <img src="docs/assets/demo.gif" alt="omniray demo" width="700">
