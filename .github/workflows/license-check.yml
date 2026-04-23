@@ -21,15 +21,12 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
-      - name: Install packages and pip-licenses
-        run: |
-          uv pip install pip-licenses --system
-          cd packages/omniwrap && uv pip install -e . --system && cd ../..
-          cd packages/omniray && uv pip install -e . --system
+      - name: Sync workspace
+        run: uv sync --all-extras --all-packages
 
       - name: Check licenses
         run: |
-          pip-licenses \
+          uv run pip-licenses \
             --allow-only "MIT;MIT License;BSD License;BSD-2-Clause;BSD-3-Clause;Apache-2.0;Apache-2.0 OR BSD-2-Clause;Apache Software License;ISC License (ISCL);Python Software Foundation License;PSF-2.0;Mozilla Public License 2.0 (MPL 2.0)" \
             --fail-on "GPL;AGPL;LGPL" \
             --format=plain
