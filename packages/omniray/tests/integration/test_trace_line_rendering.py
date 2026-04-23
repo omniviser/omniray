@@ -41,7 +41,7 @@ def _enable_flags(monkeypatch, **flag_values: bool) -> None:
 def _last_span_line(plain_lines: list[str]) -> str:
     """Return the last non-separator line that contains a closing '└─ ('."""
     for line in reversed(plain_lines):
-        if "└─ (" in line or "└─ (" in line:  # span close marker
+        if "└─ (" in line or "\\- (" in line:  # span close marker (unicode / ascii)
             return line
     msg = f"no span close line in: {plain_lines!r}"
     raise AssertionError(msg)

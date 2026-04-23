@@ -48,11 +48,11 @@ def validate_input(data: dict) -> bool: ...
 ## Configuration via `pyproject.toml`
 
 Color thresholds for the per-segment coloring of the timing line live under
-`[tool.omniray.thresholds]` in the host project's `pyproject.toml`. Each list
-defines the `DIM → GREEN → YELLOW → RED` boundaries for its value class.
+`[tool.omniray]` in the host project's `pyproject.toml`. Each list defines the
+`DIM → GREEN → YELLOW → RED` boundaries for its value class.
 
 ```toml
-[tool.omniray.thresholds]
+[tool.omniray]
 size = [0.1, 1, 10]              # MB: in/out payload (DIM < 0.1, GREEN < 1, YELLOW < 10, RED ≥ 10)
 rss = [100, 500, 1000]           # MB: rss current / peak
 rss_delta = [1, 10, 100]         # MB: RSS delta (negative / near-zero → DIM)
