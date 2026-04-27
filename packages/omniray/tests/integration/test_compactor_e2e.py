@@ -8,6 +8,8 @@ desired Thresholds — no module-level patching needed.
 
 from __future__ import annotations
 
+import sys
+
 import pytest
 from colorama import Fore, Style
 from omniray.decorators import trace
@@ -81,6 +83,10 @@ def test_repeated_leaf_collapses_to_summary_line(monkeypatch, omniray_caplog):
     assert end_lines == []
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="resource.getrusage is Unix-only; peak RSS unavailable on Windows.",
+)
 @pytest.mark.usefixtures("_enable_compaction")
 def test_summary_includes_aggregated_size_and_rss(monkeypatch, omniray_caplog):
     """With size/rss flags on, summary contains Sum-in/Sum-out/rss/peak."""
