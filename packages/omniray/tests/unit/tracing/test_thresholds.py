@@ -68,6 +68,41 @@ def test_raw_thresholds_scalar_bool_rejected():
         RawThresholds(size_big_tag_mb=True)  # type: ignore[arg-type]
 
 
+def test_raw_thresholds_compact_accepts_bool():
+    """`compact` accepts True/False, leaves them as-is."""
+    assert RawThresholds(compact=True).compact is True
+    assert RawThresholds(compact=False).compact is False
+
+
+def test_raw_thresholds_compact_wrong_type_raises():
+    with pytest.raises(RawThresholds.ConfigError, match="compact must be a bool"):
+        RawThresholds(compact="yes")  # type: ignore[arg-type]
+
+
+def test_raw_thresholds_compact_threshold_accepts_int():
+    """`compact_threshold` >= 2 accepted."""
+    expected_threshold = 5
+    assert (
+        RawThresholds(compact_threshold=expected_threshold).compact_threshold == expected_threshold
+    )
+
+
+def test_raw_thresholds_compact_threshold_below_minimum_raises():
+    with pytest.raises(RawThresholds.ConfigError, match="compact_threshold must be >= 2"):
+        RawThresholds(compact_threshold=1)
+
+
+def test_raw_thresholds_compact_threshold_wrong_type_raises():
+    with pytest.raises(RawThresholds.ConfigError, match="compact_threshold must be an int"):
+        RawThresholds(compact_threshold="five")  # type: ignore[arg-type]
+
+
+def test_raw_thresholds_compact_threshold_bool_rejected():
+    """`bool` is a subclass of `int` in Python — rejected explicitly."""
+    with pytest.raises(RawThresholds.ConfigError, match="compact_threshold must be an int"):
+        RawThresholds(compact_threshold=True)  # type: ignore[arg-type]
+
+
 def test_defaults_when_no_pyproject(tmp_path, monkeypatch):
     """Missing pyproject.toml → defaults. ``.git`` sentinel stops walk-up."""
     (tmp_path / ".git").mkdir()
