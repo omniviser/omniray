@@ -39,6 +39,8 @@ class RawThresholds:
     rss_delta: list[float] | None = None
     duration_ms: list[float] | None = None
     duration_slow_tag_ms: float | None = None
+    compact: bool | None = None
+    compact_threshold: int | None = None
 
     def __post_init__(self) -> None:
         """Validate types after initialization."""
@@ -48,6 +50,8 @@ class RawThresholds:
         self._validate_triple("rss_delta", self.rss_delta)
         self._validate_triple("duration_ms", self.duration_ms)
         self._validate_scalar("duration_slow_tag_ms", self.duration_slow_tag_ms)
+        self._validate_bool("compact", self.compact)
+        self._validate_positive_int("compact_threshold", self.compact_threshold, minimum=2)
 
     def _validate_triple(self, name: str, value: list[float] | None) -> None:
         if value is None:
@@ -68,6 +72,23 @@ class RawThresholds:
             return
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             msg = f"{name} must be numeric, got {type(value).__name__}"
+            raise self.ConfigError(msg)
+
+    def _validate_bool(self, name: str, value: bool | None) -> None:  # noqa: FBT001
+        if value is None:
+            return
+        if not isinstance(value, bool):
+            msg = f"{name} must be a bool, got {type(value).__name__}"
+            raise self.ConfigError(msg)
+
+    def _validate_positive_int(self, name: str, value: int | None, *, minimum: int) -> None:
+        if value is None:
+            return
+        if isinstance(value, bool) or not isinstance(value, int):
+            msg = f"{name} must be an int, got {type(value).__name__}"
+            raise self.ConfigError(msg)
+        if value < minimum:
+            msg = f"{name} must be >= {minimum}, got {value}"
             raise self.ConfigError(msg)
 
 
@@ -94,6 +115,8 @@ class Thresholds:
     duration_ms: tuple[float, float, float] = (1.0, 10.0, 100.0)
     duration_slow_tag_ms: float = 200.0
     size_big_tag_mb: float = 10.0
+    compact: bool = True
+    compact_threshold: int = 3
 
     @classmethod
     def from_pyproject(cls, pyproject_path: Path | None = None) -> Thresholds:
@@ -116,6 +139,12 @@ class Thresholds:
                 raw.duration_slow_tag_ms, defaults.duration_slow_tag_ms
             ),
             size_big_tag_mb=cls._to_scalar(raw.size_big_tag_mb, defaults.size_big_tag_mb),
+            compact=raw.compact if raw.compact is not None else defaults.compact,
+            compact_threshold=(
+                raw.compact_threshold
+                if raw.compact_threshold is not None
+                else defaults.compact_threshold
+            ),
         )
 
     @staticmethod

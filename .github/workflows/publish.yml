@@ -5,20 +5,27 @@ on:
     types: [published]
 
 permissions:
-  id-token: write
+  contents: read
+
+concurrency:
+  group: publish-pypi-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
 
 jobs:
   publish-omniwrap:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: pypi
+    permissions:
+      id-token: write
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.14"
 
@@ -28,23 +35,32 @@ jobs:
       - name: Build omniwrap
         run: python -m build packages/omniwrap/
 
+      - name: Smoke test omniwrap
+        run: |
+          pip install packages/omniwrap/dist/*.whl
+          python -c "import omniwrap; print(f'omniwrap {omniwrap.__version__} imported OK')"
+
       - name: Publish omniwrap to PyPI
-        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
         with:
           packages-dir: packages/omniwrap/dist/
+          attestations: true
 
   publish-omniray:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: pypi
     needs: publish-omniwrap
+    permissions:
+      id-token: write
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.14"
 
@@ -54,7 +70,13 @@ jobs:
       - name: Build omniray
         run: python -m build packages/omniray/
 
+      - name: Smoke test omniray
+        run: |
+          pip install packages/omniray/dist/*.whl
+          python -c "import omniray; print(f'omniray {omniray.__version__} imported OK')"
+
       - name: Publish omniray to PyPI
-        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
         with:
           packages-dir: packages/omniray/dist/
+          attestations: true

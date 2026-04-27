@@ -103,6 +103,7 @@ Output:
 - **[Conditional skip](https://omniviser.github.io/omniray/guide/trace-decorator/#conditional-skip)** — Skip tracing for health checks or noisy functions via `skip_if`
 - **[Selective OpenTelemetry](https://omniviser.github.io/omniray/guide/trace-decorator/#selective-opentelemetry)** — Enable OTel spans on specific functions without global overhead
 - **[Custom wrappers](https://omniviser.github.io/omniray/guide/custom-wrappers/)** — Build your own wrappers with the omniwrap engine
+- **[Streak compaction](https://omniviser.github.io/omniray/guide/configuration/#streak-compaction)** — Hot loops collapse into one summary line (`xN` count, sum/mean/max stats) — N+1 patterns visible at a glance instead of drowning the trace
 - **[Configuration](https://omniviser.github.io/omniray/guide/configuration/)** — Control paths, exclusions, and behavior via `pyproject.toml` and env vars
 
 ## Performance

@@ -14,6 +14,7 @@ from contextvars import ContextVar
 from typing import TYPE_CHECKING
 
 from omniray.tracing import profilers
+from omniray.tracing.compactor import Compactor
 from omniray.tracing.console import logger, setup_console_handler
 from omniray.tracing.flags import CONSOLE_LOG_FLAG, TraceFlags, resolve_trace_flags
 from omniray.tracing.io_loggers import IOLogger
@@ -29,6 +30,7 @@ from omniray.tracing.otel import (
 from omniray.tracing.rss import read_peak_rss_mb, read_rss_mb
 from omniray.tracing.sizing import measure_size_mb
 from omniray.tracing.span_name_generator import SpanNameGenerator
+from omniray.tracing.thresholds import Thresholds
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -48,6 +50,7 @@ class Tracer:
     """Orchestrates console profiling and OpenTelemetry span creation."""
 
     io_logger = IOLogger()
+    compactor: Compactor = Compactor(Thresholds.from_pyproject())
 
     @classmethod
     def trace(  # noqa: PLR0913
@@ -169,6 +172,19 @@ class Tracer:
         # Enforce the invariant peak >= current in the app layer.
         if rss_peak_mb is not None and rss_current_mb is not None:
             rss_peak_mb = max(rss_peak_mb, rss_current_mb)
+        compacted = cls.compactor.note_exit_success(
+            span_name,
+            current_depth,
+            duration_ms,
+            input_size_mb=input_size_mb,
+            output_size_mb=output_size_mb,
+            rss_current_mb=rss_current_mb,
+            rss_delta_mb=rss_delta_mb,
+            rss_peak_mb=rss_peak_mb,
+        )
+        if compacted:
+            # streak buffered this call — summary will render later at flush time
+            return
         profilers.log_span_success(
             span_name,
             duration_ms,
@@ -196,6 +212,7 @@ class Tracer:
         """Handle failed trace completion."""
         if flags.log:
             duration_ms = duration_s * 1000
+            cls.compactor.note_exit_failure(current_depth)
             profilers.log_span_failure(span_name, duration_ms, current_depth)
         if flags.otel:
             cls._trace_span_error(span, exception)
@@ -229,9 +246,11 @@ class Tracer:
 
     @classmethod
     def _update_depth(cls, span_name: str) -> int:
-        """Update call depth and log span start."""
+        """Update call depth and log span start (deferred when compactor active)."""
         current_depth = _call_depth.get()
         _call_depth.set(current_depth + 1)
+        if cls.compactor.note_entry(span_name, current_depth):
+            return current_depth
         indent = profilers.get_indent(current_depth, is_start=True)
         logger.info("%s%s", indent, span_name)
         return current_depth
