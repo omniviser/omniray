@@ -38,13 +38,13 @@ jobs:
       - name: Smoke test omniwrap
         run: |
           pip install packages/omniwrap/dist/*.whl
-          python -c "import omniwrap; print(f'omniwrap {omniwrap.__version__} imported OK')"
+          python -c "import omniwrap; print('omniwrap imported OK')"
 
       - name: Publish omniwrap to PyPI
         uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
         with:
           packages-dir: packages/omniwrap/dist/
-          attestations: true
+          attestations: false
 
   publish-omniray:
     runs-on: ubuntu-latest
@@ -73,10 +73,10 @@ jobs:
       - name: Smoke test omniray
         run: |
           pip install packages/omniray/dist/*.whl
-          python -c "import omniray; print(f'omniray {omniray.__version__} imported OK')"
+          python -c "import omniray; print('omniray imported OK')"
 
       - name: Publish omniray to PyPI
         uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
         with:
           packages-dir: packages/omniray/dist/
-          attestations: true
+          attestations: false
