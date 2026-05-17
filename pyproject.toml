@@ -19,6 +19,7 @@ dev = [
     "mypy>=1.15",
     "types-psutil>=7.0",
     "pip-licenses>=5.0",
+    "shamefile>=0.1.7",
 ]
 docs = [
     "mkdocs-material>=9.0",

@@ -35,3 +35,6 @@ jobs:
 
       - name: MyPy omniray
         run: uv run --directory packages/omniray mypy omniray/
+
+      - name: Shamefile check
+        run: uv run shame me . --dry-run

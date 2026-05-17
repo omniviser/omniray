@@ -58,16 +58,16 @@ def log_span_success(  # noqa: PLR0913
     rss_peak_mb: float | None = None,
 ) -> None:
     """Log span success with per-segment colored values."""
-    body = _colored(
-        _bucket_color(duration_ms, _THRESHOLDS.duration_ms),
+    body = colored(
+        bucket_color(duration_ms, _THRESHOLDS.duration_ms),
         f"{duration_ms:.2f}ms",
     )
     if input_size_mb is not None:
-        body += ", in: " + _format_mb(input_size_mb, _THRESHOLDS.size_mb)
+        body += ", in: " + format_mb(input_size_mb, _THRESHOLDS.size_mb)
     if output_size_mb is not None:
-        body += ", out: " + _format_mb(output_size_mb, _THRESHOLDS.size_mb)
+        body += ", out: " + format_mb(output_size_mb, _THRESHOLDS.size_mb)
     if rss_current_mb is not None:
-        body += ", rss: " + _format_mb(rss_current_mb, _THRESHOLDS.rss_mb)
+        body += ", rss: " + format_mb(rss_current_mb, _THRESHOLDS.rss_mb)
         extras = _format_rss_extras(rss_delta_mb, rss_peak_mb)
         if extras:
             body += f" ({extras})"
@@ -104,12 +104,12 @@ def get_indent(depth: int, *, is_start: bool = True) -> str:
     return prefix + (NEST_START if is_start else NEST_END)
 
 
-def _colored(color: str, text: str) -> str:
+def colored(color: str, text: str) -> str:
     """Wrap *text* in *color* with a trailing style reset."""
     return f"{color}{text}{Style.RESET_ALL}"
 
 
-def _bucket_color(value: float, thresholds: tuple[float, float, float]) -> str:
+def bucket_color(value: float, thresholds: tuple[float, float, float]) -> str:
     """Map *value* onto a DIM/GREEN/YELLOW/RED bucket using ``(low, medium, high)``."""
     low, medium, high = thresholds
     if value < low:
@@ -121,19 +121,19 @@ def _bucket_color(value: float, thresholds: tuple[float, float, float]) -> str:
     return Fore.RED + Style.BRIGHT
 
 
-def _format_mb(value: float, thresholds: tuple[float, float, float], *, sign: bool = False) -> str:
+def format_mb(value: float, thresholds: tuple[float, float, float], *, sign: bool = False) -> str:
     """Return a colored ``X.XXMB`` string; ``sign=True`` forces a leading +/-."""
     spec = f"{value:+.2f}" if sign else f"{value:.2f}"
-    return _colored(_bucket_color(value, thresholds), f"{spec}MB")
+    return colored(bucket_color(value, thresholds), f"{spec}MB")
 
 
 def _format_rss_extras(rss_delta_mb: float | None, rss_peak_mb: float | None) -> str:
     """Build the ``Δ..., max: ...`` group (empty string when both inputs are ``None``)."""
     extras: list[str] = []
     if rss_delta_mb is not None:
-        extras.append(DELTA + _format_mb(rss_delta_mb, _THRESHOLDS.rss_delta_mb, sign=True))
+        extras.append(DELTA + format_mb(rss_delta_mb, _THRESHOLDS.rss_delta_mb, sign=True))
     if rss_peak_mb is not None:
-        extras.append("max: " + _format_mb(rss_peak_mb, _THRESHOLDS.rss_mb))
+        extras.append("max: " + format_mb(rss_peak_mb, _THRESHOLDS.rss_mb))
     return ", ".join(extras)
 
 

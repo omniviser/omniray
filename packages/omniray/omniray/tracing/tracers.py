@@ -10,6 +10,7 @@ Important Notes:
 from __future__ import annotations
 
 import time
+from contextlib import suppress
 from contextvars import ContextVar
 from typing import TYPE_CHECKING
 
@@ -25,7 +26,9 @@ from omniray.tracing.otel import (
     OTEL_MISSING_MSG,
     Status,
     StatusCode,
+    context_api,
     otel_tracer,
+    trace_api,
 )
 from omniray.tracing.rss import read_peak_rss_mb, read_rss_mb
 from omniray.tracing.sizing import measure_size_mb
@@ -110,12 +113,10 @@ class Tracer:
                     result = wrapped(*args, **kwargs)
                 except Exception as e:
                     duration_s = time.time() - start_time
-                    try:  # noqa: SIM105 - tracing must never mask user exceptions
+                    with suppress(Exception):
                         cls._finish_tracing_failure(
                             span, duration_s, span_name, current_depth, e, flags
                         )
-                    except Exception:  # noqa: BLE001, S110
-                        pass
                     raise
                 else:
                     duration_s = time.time() - start_time
@@ -130,10 +131,8 @@ class Tracer:
                     )
                     return result
                 finally:
-                    try:  # noqa: SIM105 - tracing must never mask user exceptions
+                    with suppress(Exception):
                         cls._trace_duration(span, duration_s)
-                    except Exception:  # noqa: BLE001, S110
-                        pass
         finally:
             _call_depth.set(current_depth)
 
@@ -331,12 +330,10 @@ class AsyncTracer(Tracer):
                     result = await wrapped(*args, **kwargs)
                 except Exception as e:
                     duration_s = time.time() - start_time
-                    try:  # noqa: SIM105 - tracing must never mask user exceptions
+                    with suppress(Exception):
                         cls._finish_tracing_failure(
                             span, duration_s, span_name, current_depth, e, flags
                         )
-                    except Exception:  # noqa: BLE001, S110
-                        pass
                     raise
                 else:
                     duration_s = time.time() - start_time
@@ -351,10 +348,8 @@ class AsyncTracer(Tracer):
                     )
                     return result
                 finally:
-                    try:  # noqa: SIM105 - tracing must never mask user exceptions
+                    with suppress(Exception):
                         cls._trace_duration(span, duration_s)
-                    except Exception:  # noqa: BLE001, S110
-                        pass
             finally:
                 cls._exit_otel_span(span, token, flags)
         finally:
@@ -365,13 +360,10 @@ class AsyncTracer(Tracer):
         """Start an OTel span with explicit attach — no generator, safe for async GC."""
         if not flags.otel:
             return None, None
-        from opentelemetry import context as context_api  # noqa: PLC0415
-        from opentelemetry import trace as trace_api  # noqa: PLC0415
-
-        # otel_tracer guaranteed non-None: guarded by flags.otel + HAS_OTEL
+        # otel_tracer/context_api/trace_api guaranteed non-None: guarded by flags.otel + HAS_OTEL
         span = otel_tracer.start_span(span_name)  # type: ignore[union-attr]
-        ctx = trace_api.set_span_in_context(span)
-        token = context_api.attach(ctx)
+        ctx = trace_api.set_span_in_context(span)  # type: ignore[union-attr]
+        token = context_api.attach(ctx)  # type: ignore[union-attr]
         return span, token
 
     @staticmethod
@@ -379,7 +371,5 @@ class AsyncTracer(Tracer):
         """Detach context and end span. Counterpart to :meth:`_enter_otel_span`."""
         if not flags.otel:
             return
-        from opentelemetry import context as context_api  # noqa: PLC0415
-
-        context_api.detach(token)  # type: ignore[arg-type]  # Token[Context] stored as object
+        context_api.detach(token)  # type: ignore[union-attr, arg-type]
         span.end()  # type: ignore[union-attr]

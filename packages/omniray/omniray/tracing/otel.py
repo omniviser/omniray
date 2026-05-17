@@ -24,11 +24,14 @@ class OtelConfig:
     status: type[_StatusType] | None
     status_code: type[_StatusCodeType] | None
     span_type: type | None
+    context_api: object | None
+    trace_api: object | None
 
 
 def _init_otel(*, module_name: str) -> OtelConfig:
     """Initialize OpenTelemetry integration if available."""
     try:
+        from opentelemetry import context as _context_api  # noqa: PLC0415
         from opentelemetry import trace as api  # noqa: PLC0415
         from opentelemetry.trace import INVALID_SPAN  # noqa: PLC0415
         from opentelemetry.trace import Span as _OtelSpan  # noqa: PLC0415
@@ -42,6 +45,8 @@ def _init_otel(*, module_name: str) -> OtelConfig:
             status=_Status,
             status_code=_StatusCode,
             span_type=_OtelSpan,
+            context_api=_context_api,
+            trace_api=api,
         )
     except ImportError:
         return OtelConfig(
@@ -51,6 +56,8 @@ def _init_otel(*, module_name: str) -> OtelConfig:
             status=None,
             status_code=None,
             span_type=None,
+            context_api=None,
+            trace_api=None,
         )
 
 
@@ -77,5 +84,7 @@ NOOP_CONTEXT = _otel.noop_context
 Status = _otel.status
 StatusCode = _otel.status_code
 OtelSpan = _otel.span_type
+context_api = _otel.context_api
+trace_api = _otel.trace_api
 
 OTEL_FLAG = _check_otel_env(flag=_env_flag("OMNIRAY_OTEL"), has_otel=HAS_OTEL)
