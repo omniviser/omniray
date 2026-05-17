@@ -135,70 +135,6 @@ entries:
     why: >-
       callers would allocate a metrics struct per call on the trace hot path
 
-  - location: ./packages/omniray/omniray/tracing/compactor.py:227
-    token: '# noqa'
-    content: 'profilers._colored(Fore.RED + Style.BRIGHT, f"x{streak.count}"),  # noqa: SLF001'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      exposing these formatters publicly would lock in a private helper as API
-
-  - location: ./packages/omniray/omniray/tracing/compactor.py:271
-    token: '# noqa'
-    content: 'color = profilers._bucket_color(value_ms, thresholds.duration_ms)  # noqa: SLF001'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      exposing these formatters publicly would lock in a private helper as API
-
-  - location: ./packages/omniray/omniray/tracing/compactor.py:272
-    token: '# noqa'
-    content: 'return profilers._colored(color, f"{value_ms:.2f}ms")  # noqa: SLF001'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      exposing these formatters publicly would lock in a private helper as API
-
-  - location: ./packages/omniray/omniray/tracing/compactor.py:279
-    token: '# noqa'
-    content: 'parts.append("Σin: " + profilers._format_mb(streak.total_input_mb, thresholds.size_mb))  # noqa: SLF001'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      exposing these formatters publicly would lock in a private helper as API
-
-  - location: ./packages/omniray/omniray/tracing/compactor.py:281
-    token: '# noqa'
-    content: 'parts.append("Σout: " + profilers._format_mb(streak.total_output_mb, thresholds.size_mb))  # noqa: SLF001'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      exposing these formatters publicly would lock in a private helper as API
-
-  - location: ./packages/omniray/omniray/tracing/compactor.py:283
-    token: '# noqa'
-    content: 'parts.append("rss: " + profilers._format_mb(streak.max_rss_mb, thresholds.rss_mb))  # noqa: SLF001'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      exposing these formatters publicly would lock in a private helper as API
-
-  - location: ./packages/omniray/omniray/tracing/compactor.py:287
-    token: '# noqa'
-    content: '+ profilers._format_mb(  # noqa: SLF001'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      exposing these formatters publicly would lock in a private helper as API
-
-  - location: ./packages/omniray/omniray/tracing/compactor.py:292
-    token: '# noqa'
-    content: 'parts.append("peak: " + profilers._format_mb(streak.max_rss_peak_mb, thresholds.rss_mb))  # noqa: SLF001'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      exposing these formatters publicly would lock in a private helper as API
-
   - location: ./packages/omniray/omniray/tracing/flags.py:49
     token: '# noqa'
     content: 'def resolve_trace_flags(  # noqa: PLR0913'
@@ -213,25 +149,9 @@ entries:
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: 'splitting would duplicate parameter plumbing for no behavioral gain'
 
-  - location: ./packages/omniray/omniray/tracing/otel.py:32
-    token: '# noqa'
-    content: 'from opentelemetry import trace as api  # noqa: PLC0415'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      module-top import would crash omniray install without the [otel] extra
-
-  - location: ./packages/omniray/omniray/tracing/otel.py:33
-    token: '# noqa'
-    content: 'from opentelemetry.trace import INVALID_SPAN  # noqa: PLC0415'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      module-top import would crash omniray install without the [otel] extra
-
   - location: ./packages/omniray/omniray/tracing/otel.py:34
     token: '# noqa'
-    content: 'from opentelemetry.trace import Span as _OtelSpan  # noqa: PLC0415'
+    content: 'from opentelemetry import context as _context_api  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
@@ -239,7 +159,7 @@ entries:
 
   - location: ./packages/omniray/omniray/tracing/otel.py:35
     token: '# noqa'
-    content: 'from opentelemetry.trace import Status as _Status  # noqa: PLC0415'
+    content: 'from opentelemetry import trace as api  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
@@ -247,9 +167,33 @@ entries:
 
   - location: ./packages/omniray/omniray/tracing/otel.py:36
     token: '# noqa'
-    content: 'from opentelemetry.trace import StatusCode as _StatusCode  # noqa: PLC0415'
+    content: 'from opentelemetry.trace import INVALID_SPAN  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
+    why: >-
+      module-top import would crash omniray install without the [otel] extra
+
+  - location: ./packages/omniray/omniray/tracing/otel.py:37
+    token: '# noqa'
+    content: 'from opentelemetry.trace import Span as _OtelSpan  # noqa: PLC0415'
+    created_at: 2026-05-17
+    owner: Bartlomiej Flis <bartekdawidflis@gmail.com>
+    why: >-
+      module-top import would crash omniray install without the [otel] extra
+
+  - location: ./packages/omniray/omniray/tracing/otel.py:38
+    token: '# noqa'
+    content: 'from opentelemetry.trace import Status as _Status  # noqa: PLC0415'
+    created_at: 2026-05-17
+    owner: Bartlomiej Flis <bartekdawidflis@gmail.com>
+    why: >-
+      module-top import would crash omniray install without the [otel] extra
+
+  - location: ./packages/omniray/omniray/tracing/otel.py:39
+    token: '# noqa'
+    content: 'from opentelemetry.trace import StatusCode as _StatusCode  # noqa: PLC0415'
+    created_at: 2026-05-17
+    owner: Bartlomiej Flis <bartekdawidflis@gmail.com>
     why: >-
       module-top import would crash omniray install without the [otel] extra
 
@@ -302,16 +246,7 @@ entries:
     why: >-
       narrow except would let an unanticipated pympler bug crash the traced app
 
-  - location: ./packages/omniray/omniray/tracing/thresholds.py:77
-    token: '# noqa'
-    content: 'def _validate_bool(self, name: str, value: bool | None) -> None:  # noqa: FBT001'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      rule targets booleans on public functions; this is a module-internal
-      helper
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:56
+  - location: ./packages/omniray/omniray/tracing/tracers.py:59
     token: '# noqa'
     content: 'def trace(  # noqa: PLR0913'
     created_at: 2026-05-17
@@ -319,14 +254,14 @@ entries:
     why: >-
       config-struct param would force allocation per traced call on the hot path
 
-  - location: ./packages/omniray/omniray/tracing/tracers.py:105
+  - location: ./packages/omniray/omniray/tracing/tracers.py:108
     token: '# type: ignore'
     content: 'context = otel_tracer.start_as_current_span(span_name) if flags.otel else NOOP_CONTEXT  # type: ignore[union-attr]'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: 'asserting non-None would add a runtime check on every trace call'
 
-  - location: ./packages/omniray/omniray/tracing/tracers.py:106
+  - location: ./packages/omniray/omniray/tracing/tracers.py:109
     token: '# type: ignore'
     content: 'with context as span:  # type: ignore[union-attr]'
     created_at: 2026-05-17
@@ -335,43 +270,7 @@ entries:
       narrowing the union needs Protocol gymnastics over otel's heterogeneous
       Spans
 
-  - location: ./packages/omniray/omniray/tracing/tracers.py:113
-    token: '# noqa'
-    content: 'try:  # noqa: SIM105 - tracing must never mask user exceptions'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      contextlib.suppress would hide the nested handler from the surrounding
-      flow
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:117
-    token: '# noqa'
-    content: 'except Exception:  # noqa: BLE001, S110'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      narrow except would let a tracing-internal bug mask the re-raised user
-      exception
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:133
-    token: '# noqa'
-    content: 'try:  # noqa: SIM105 - tracing must never mask user exceptions'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      contextlib.suppress would hide the nested handler from the surrounding
-      flow
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:135
-    token: '# noqa'
-    content: 'except Exception:  # noqa: BLE001, S110'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      narrow except would let a tracing-internal bug mask the re-raised user
-      exception
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:148
+  - location: ./packages/omniray/omniray/tracing/tracers.py:147
     token: '# noqa'
     content: 'def _finish_tracing(  # noqa: PLR0913'
     created_at: 2026-05-17
@@ -380,7 +279,7 @@ entries:
       pre-measured metrics from the outer scope must reach loggers without
       re-measuring
 
-  - location: ./packages/omniray/omniray/tracing/tracers.py:203
+  - location: ./packages/omniray/omniray/tracing/tracers.py:202
     token: '# noqa'
     content: 'def _finish_tracing_failure(  # noqa: PLR0913'
     created_at: 2026-05-17
@@ -389,14 +288,14 @@ entries:
       splitting would force two call sites in the failure path passing the same
       context
 
-  - location: ./packages/omniray/omniray/tracing/tracers.py:265
+  - location: ./packages/omniray/omniray/tracing/tracers.py:264
     token: '# type: ignore'
     content: 'span.set_status(Status(StatusCode.ERROR, str(exception)))  # type: ignore[misc, union-attr]'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: 'asserting non-None would add a runtime check on every span error'
 
-  - location: ./packages/omniray/omniray/tracing/tracers.py:278
+  - location: ./packages/omniray/omniray/tracing/tracers.py:277
     token: '# noqa'
     content: 'async def trace(  # noqa: PLR0913'
     created_at: 2026-05-17
@@ -405,57 +304,7 @@ entries:
       config-struct param would force allocation per traced call on the async
       hot path
 
-  - location: ./packages/omniray/omniray/tracing/tracers.py:334
-    token: '# noqa'
-    content: 'try:  # noqa: SIM105 - tracing must never mask user exceptions'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      contextlib.suppress would hide the nested handler from the surrounding
-      flow
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:338
-    token: '# noqa'
-    content: 'except Exception:  # noqa: BLE001, S110'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      narrow except would let a tracing-internal bug mask the re-raised user
-      exception
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:354
-    token: '# noqa'
-    content: 'try:  # noqa: SIM105 - tracing must never mask user exceptions'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      contextlib.suppress would hide the nested handler from the surrounding
-      flow
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:356
-    token: '# noqa'
-    content: 'except Exception:  # noqa: BLE001, S110'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      narrow except would let a tracing-internal bug mask the re-raised user
-      exception
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:368
-    token: '# noqa'
-    content: 'from opentelemetry import context as context_api  # noqa: PLC0415'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: 'top-level import would crash module load without the [otel] extra'
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:369
-    token: '# noqa'
-    content: 'from opentelemetry import trace as trace_api  # noqa: PLC0415'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: 'top-level import would crash module load without the [otel] extra'
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:372
+  - location: ./packages/omniray/omniray/tracing/tracers.py:364
     token: '# type: ignore'
     content: 'span = otel_tracer.start_span(span_name)  # type: ignore[union-attr]'
     created_at: 2026-05-17
@@ -463,23 +312,28 @@ entries:
     why: >-
       asserting non-None would add a runtime check on every async span start
 
-  - location: ./packages/omniray/omniray/tracing/tracers.py:382
-    token: '# noqa'
-    content: 'from opentelemetry import context as context_api  # noqa: PLC0415'
-    created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: 'top-level import would crash module load without the [otel] extra'
-
-  - location: ./packages/omniray/omniray/tracing/tracers.py:384
+  - location: ./packages/omniray/omniray/tracing/tracers.py:365
     token: '# type: ignore'
-    content: 'context_api.detach(token)  # type: ignore[arg-type]  # Token[Context] stored as object'
+    content: 'ctx = trace_api.set_span_in_context(span)  # type: ignore[union-attr]'
     created_at: 2026-05-17
-    owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      typing the field as Token[Context] would leak otel types into the no-extra
-      build
+    owner: Bartlomiej Flis <bartekdawidflis@gmail.com>
+    why: 'asserting non-None would add a runtime check on every trace call'
 
-  - location: ./packages/omniray/omniray/tracing/tracers.py:385
+  - location: ./packages/omniray/omniray/tracing/tracers.py:366
+    token: '# type: ignore'
+    content: 'token = context_api.attach(ctx)  # type: ignore[union-attr]'
+    created_at: 2026-05-17
+    owner: Bartlomiej Flis <bartekdawidflis@gmail.com>
+    why: 'asserting non-None would add a runtime check on every trace call'
+
+  - location: ./packages/omniray/omniray/tracing/tracers.py:374
+    token: '# type: ignore'
+    content: 'context_api.detach(token)  # type: ignore[union-attr, arg-type]'
+    created_at: 2026-05-17
+    owner: Bartlomiej Flis <bartekdawidflis@gmail.com>
+    why: 'asserting non-None would add a runtime check on every async span'
+
+  - location: ./packages/omniray/omniray/tracing/tracers.py:375
     token: '# type: ignore'
     content: 'span.end()  # type: ignore[union-attr]'
     created_at: 2026-05-17

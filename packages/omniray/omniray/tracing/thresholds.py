@@ -50,7 +50,7 @@ class RawThresholds:
         self._validate_triple("rss_delta", self.rss_delta)
         self._validate_triple("duration_ms", self.duration_ms)
         self._validate_scalar("duration_slow_tag_ms", self.duration_slow_tag_ms)
-        self._validate_bool("compact", self.compact)
+        self._validate_bool("compact", value=self.compact)
         self._validate_positive_int("compact_threshold", self.compact_threshold, minimum=2)
 
     def _validate_triple(self, name: str, value: list[float] | None) -> None:
@@ -74,7 +74,7 @@ class RawThresholds:
             msg = f"{name} must be numeric, got {type(value).__name__}"
             raise self.ConfigError(msg)
 
-    def _validate_bool(self, name: str, value: bool | None) -> None:  # noqa: FBT001
+    def _validate_bool(self, name: str, *, value: bool | None) -> None:
         if value is None:
             return
         if not isinstance(value, bool):

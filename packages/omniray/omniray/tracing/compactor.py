@@ -224,7 +224,7 @@ class Compactor:
         logger.info(
             "%s%s %s",
             profilers.get_indent(streak.depth, is_start=False),
-            profilers._colored(Fore.RED + Style.BRIGHT, f"x{streak.count}"),  # noqa: SLF001
+            profilers.colored(Fore.RED + Style.BRIGHT, f"x{streak.count}"),
             streak.span_name,
         )
         cont = _continuation_indent(streak.depth)
@@ -268,26 +268,23 @@ def _format_time_line(streak: _Streak, avg_ms: float, thresholds: Thresholds) ->
 
 
 def _color_ms(value_ms: float, thresholds: Thresholds) -> str:
-    color = profilers._bucket_color(value_ms, thresholds.duration_ms)  # noqa: SLF001
-    return profilers._colored(color, f"{value_ms:.2f}ms")  # noqa: SLF001
+    color = profilers.bucket_color(value_ms, thresholds.duration_ms)
+    return profilers.colored(color, f"{value_ms:.2f}ms")
 
 
 def _format_memory_line(streak: _Streak, thresholds: Thresholds) -> str:
     """Build the ``memory:`` continuation line, omitting unset fields."""
     parts: list[str] = []
     if streak.total_input_mb is not None:
-        parts.append("Σin: " + profilers._format_mb(streak.total_input_mb, thresholds.size_mb))  # noqa: SLF001
+        parts.append("Σin: " + profilers.format_mb(streak.total_input_mb, thresholds.size_mb))
     if streak.total_output_mb is not None:
-        parts.append("Σout: " + profilers._format_mb(streak.total_output_mb, thresholds.size_mb))  # noqa: SLF001
+        parts.append("Σout: " + profilers.format_mb(streak.total_output_mb, thresholds.size_mb))
     if streak.max_rss_mb is not None:
-        parts.append("rss: " + profilers._format_mb(streak.max_rss_mb, thresholds.rss_mb))  # noqa: SLF001
+        parts.append("rss: " + profilers.format_mb(streak.max_rss_mb, thresholds.rss_mb))
     if streak.total_rss_delta_mb is not None:
         parts.append(
-            "Σ"
-            + profilers._format_mb(  # noqa: SLF001
-                streak.total_rss_delta_mb, thresholds.rss_delta_mb, sign=True
-            )
+            "Σ" + profilers.format_mb(streak.total_rss_delta_mb, thresholds.rss_delta_mb, sign=True)
         )
     if streak.max_rss_peak_mb is not None:
-        parts.append("peak: " + profilers._format_mb(streak.max_rss_peak_mb, thresholds.rss_mb))  # noqa: SLF001
+        parts.append("peak: " + profilers.format_mb(streak.max_rss_peak_mb, thresholds.rss_mb))
     return ", ".join(parts)

@@ -320,9 +320,9 @@ def test_get_indent_depth_two():
     ],
 )
 def test_bucket_color_for_duration(monkeypatch, duration_ms, expected_color):
-    """Test _bucket_color returns correct color for different durations."""
+    """Test bucket_color returns correct color for different durations."""
     monkeypatch.setattr(profilers, "_THRESHOLDS", Thresholds())
-    result = profilers._bucket_color(duration_ms, profilers._THRESHOLDS.duration_ms)
+    result = profilers.bucket_color(duration_ms, profilers._THRESHOLDS.duration_ms)
 
     assert result == expected_color
 
@@ -440,7 +440,7 @@ _DEFAULT_THRESHOLDS = Thresholds()
 )
 def test_bucket_color_for_size(monkeypatch, value, expected):
     monkeypatch.setattr(profilers, "_THRESHOLDS", _DEFAULT_THRESHOLDS)
-    assert profilers._bucket_color(value, _DEFAULT_THRESHOLDS.size_mb) == expected
+    assert profilers.bucket_color(value, _DEFAULT_THRESHOLDS.size_mb) == expected
 
 
 @pytest.mark.parametrize(
@@ -454,7 +454,7 @@ def test_bucket_color_for_size(monkeypatch, value, expected):
 )
 def test_bucket_color_for_rss(monkeypatch, value, expected):
     monkeypatch.setattr(profilers, "_THRESHOLDS", _DEFAULT_THRESHOLDS)
-    assert profilers._bucket_color(value, _DEFAULT_THRESHOLDS.rss_mb) == expected
+    assert profilers.bucket_color(value, _DEFAULT_THRESHOLDS.rss_mb) == expected
 
 
 @pytest.mark.parametrize(
@@ -472,4 +472,4 @@ def test_bucket_color_for_rss(monkeypatch, value, expected):
 def test_bucket_color_for_rss_delta(monkeypatch, value, expected):
     """Unified DIM/GREEN/YELLOW/RED ladder — negative/near-zero fall into ``< low`` → DIM."""
     monkeypatch.setattr(profilers, "_THRESHOLDS", _DEFAULT_THRESHOLDS)
-    assert profilers._bucket_color(value, _DEFAULT_THRESHOLDS.rss_delta_mb) == expected
+    assert profilers.bucket_color(value, _DEFAULT_THRESHOLDS.rss_delta_mb) == expected
