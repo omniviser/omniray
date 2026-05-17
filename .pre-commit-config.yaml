@@ -24,3 +24,8 @@ repos:
         additional_dependencies: [wrapt, pydantic, opentelemetry-api, opentelemetry-sdk]
         files: ^packages/
         exclude: tests/
+
+  - repo: https://github.com/BKDDFS/shamefile
+    rev: main
+    hooks:
+      - id: shamefile
