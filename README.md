@@ -12,6 +12,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/omniray)](https://pypi.org/project/omniray/)
 [![Docs](https://img.shields.io/badge/docs-blue)](https://omniviser.github.io/omniray/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![shamefile](https://img.shields.io/badge/tracked_with-shamefile-fe3434)](https://github.com/BKDDFS/shamefile)
 
 **One call, and you see everything that's happening in your code.**
 
