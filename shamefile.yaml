@@ -9,8 +9,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      benchmark needs to reset internal lru_cache between runs; no public API
-      exposes that singleton
+      benchmark resets internal flags singleton dict between scenarios; no
+      public reset API
 
   - location: ./benchmarks/bench_tracer_overhead.py:91
     token: '# noqa'
@@ -18,8 +18,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      benchmark keeps stream open for lifetime of run; context manager would
-      skew timings
+      benchmark keeps fd open and uses os.devnull/plain open for parity with
+      production stream handling; context manager + pathlib would skew timings
 
   - location: ./examples/big_red_button/__main__.py:12
     token: '# noqa'
@@ -72,8 +72,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      _omniwrap_skip is omniwrap's documented sentinel attribute for opting out
-      of auto-wrap; cross-package contract, not encapsulation violation
+      _omniwrap_skip: documented sentinel attribute that wrap_all() honors;
+      module-private not type-private
 
   - location: ./packages/omniray/omniray/decorators.py:25
     token: '# type: ignore'
@@ -146,8 +146,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      profilers._colored is the package-internal color helper reused across
-      tracing modules; module-private not type-private
+      profilers helper reused across tracing modules; module-private not
+      type-private
 
   - location: ./packages/omniray/omniray/tracing/compactor.py:271
     token: '# noqa'
@@ -155,8 +155,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      _bucket_color is a package-internal duration coloring helper shared across
-      tracing modules; module-private not type-private
+      profilers helper reused across tracing modules; module-private not
+      type-private
 
   - location: ./packages/omniray/omniray/tracing/compactor.py:272
     token: '# noqa'
@@ -164,8 +164,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      profilers._colored is the package-internal color helper reused across
-      tracing modules; module-private not type-private
+      profilers helper reused across tracing modules; module-private not
+      type-private
 
   - location: ./packages/omniray/omniray/tracing/compactor.py:279
     token: '# noqa'
@@ -173,8 +173,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      _format_mb is profilers' package-internal size formatter shared across
-      tracing output paths; module-private not type-private
+      profilers helper reused across tracing modules; module-private not
+      type-private
 
   - location: ./packages/omniray/omniray/tracing/compactor.py:281
     token: '# noqa'
@@ -182,8 +182,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      _format_mb is profilers' package-internal size formatter shared across
-      tracing output paths; module-private not type-private
+      profilers helper reused across tracing modules; module-private not
+      type-private
 
   - location: ./packages/omniray/omniray/tracing/compactor.py:283
     token: '# noqa'
@@ -191,8 +191,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      _format_mb is profilers' package-internal size formatter shared across
-      tracing output paths; module-private not type-private
+      profilers helper reused across tracing modules; module-private not
+      type-private
 
   - location: ./packages/omniray/omniray/tracing/compactor.py:287
     token: '# noqa'
@@ -200,8 +200,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      _format_mb is profilers' package-internal size formatter shared across
-      tracing output paths; module-private not type-private
+      profilers helper reused across tracing modules; module-private not
+      type-private
 
   - location: ./packages/omniray/omniray/tracing/compactor.py:292
     token: '# noqa'
@@ -209,8 +209,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      _format_mb is profilers' package-internal size formatter shared across
-      tracing output paths; module-private not type-private
+      profilers helper reused across tracing modules; module-private not
+      type-private
 
   - location: ./packages/omniray/omniray/tracing/flags.py:49
     token: '# noqa'
@@ -235,45 +235,35 @@ entries:
     content: 'from opentelemetry import trace as api  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      opentelemetry is an optional dependency; import lives inside try/except to
-      keep import-time graceful when otel extras not installed
+    why: 'otel is an optional extra; import inside try/except'
 
   - location: ./packages/omniray/omniray/tracing/otel.py:33
     token: '# noqa'
     content: 'from opentelemetry.trace import INVALID_SPAN  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      opentelemetry is an optional dependency; import lives inside try/except to
-      keep import-time graceful when otel extras not installed
+    why: 'otel is an optional extra; import inside try/except'
 
   - location: ./packages/omniray/omniray/tracing/otel.py:34
     token: '# noqa'
     content: 'from opentelemetry.trace import Span as _OtelSpan  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      opentelemetry is an optional dependency; import lives inside try/except to
-      keep import-time graceful when otel extras not installed
+    why: 'otel is an optional extra; import inside try/except'
 
   - location: ./packages/omniray/omniray/tracing/otel.py:35
     token: '# noqa'
     content: 'from opentelemetry.trace import Status as _Status  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      opentelemetry is an optional dependency; import lives inside try/except to
-      keep import-time graceful when otel extras not installed
+    why: 'otel is an optional extra; import inside try/except'
 
   - location: ./packages/omniray/omniray/tracing/otel.py:36
     token: '# noqa'
     content: 'from opentelemetry.trace import StatusCode as _StatusCode  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      opentelemetry is an optional dependency; import lives inside try/except to
-      keep import-time graceful when otel extras not installed
+    why: 'otel is an optional extra; import inside try/except'
 
   - location: ./packages/omniray/omniray/tracing/profilers.py:49
     token: '# noqa'
@@ -307,27 +297,21 @@ entries:
     content: 'except Exception:  # noqa: BLE001'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      tracing must never break the traced app; any psutil failure (permissions,
-      dead pid, platform quirk) silently degrades to None
+    why: 'tracing must never break the traced app; degrade silently to None'
 
   - location: ./packages/omniray/omniray/tracing/rss.py:69
     token: '# noqa'
     content: 'except Exception:  # noqa: BLE001'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      same contract as read_rss_mb: tracing must never break the traced app; any
-      getrusage failure silently degrades to None
+    why: 'tracing must never break the traced app; degrade silently to None'
 
   - location: ./packages/omniray/omniray/tracing/sizing.py:24
     token: '# noqa'
     content: 'except Exception:  # noqa: BLE001'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      tracing must never break the traced app; pympler.asizeof can raise on
-      cycles or exotic objects, degrade to None
+    why: 'tracing must never break the traced app; degrade silently to None'
 
   - location: ./packages/omniray/omniray/tracing/thresholds.py:77
     token: '# noqa'
@@ -372,18 +356,15 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      contextlib.suppress would swallow the user exception being raised;
-      explicit try/except needed so original 'raise' propagates
+      explicit try/except chosen over contextlib.suppress for readability inside
+      nested exception handler
 
   - location: ./packages/omniray/omniray/tracing/tracers.py:117
     token: '# noqa'
     content: 'except Exception:  # noqa: BLE001, S110'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      logging the failure must not mask the original user exception; silent
-      swallow is intentional — the user's exception is re-raised on the next
-      line
+    why: 'logging the failure must not mask the user exception re-raised below'
 
   - location: ./packages/omniray/omniray/tracing/tracers.py:133
     token: '# noqa'
@@ -391,18 +372,15 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      contextlib.suppress would swallow the user exception being raised;
-      explicit try/except needed so original 'raise' propagates
+      explicit try/except chosen over contextlib.suppress for readability inside
+      nested exception handler
 
   - location: ./packages/omniray/omniray/tracing/tracers.py:135
     token: '# noqa'
     content: 'except Exception:  # noqa: BLE001, S110'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      logging the failure must not mask the original user exception; silent
-      swallow is intentional — the user's exception is re-raised on the next
-      line
+    why: 'logging the failure must not mask the user exception re-raised below'
 
   - location: ./packages/omniray/omniray/tracing/tracers.py:148
     token: '# noqa'
@@ -447,18 +425,15 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      contextlib.suppress would swallow the user exception being raised;
-      explicit try/except needed so original 'raise' propagates
+      explicit try/except chosen over contextlib.suppress for readability inside
+      nested exception handler
 
   - location: ./packages/omniray/omniray/tracing/tracers.py:338
     token: '# noqa'
     content: 'except Exception:  # noqa: BLE001, S110'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      logging the failure must not mask the original user exception; silent
-      swallow is intentional — the user's exception is re-raised on the next
-      line
+    why: 'logging the failure must not mask the user exception re-raised below'
 
   - location: ./packages/omniray/omniray/tracing/tracers.py:354
     token: '# noqa'
@@ -466,36 +441,29 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      contextlib.suppress would swallow the user exception being raised;
-      explicit try/except needed so original 'raise' propagates
+      explicit try/except chosen over contextlib.suppress for readability inside
+      nested exception handler
 
   - location: ./packages/omniray/omniray/tracing/tracers.py:356
     token: '# noqa'
     content: 'except Exception:  # noqa: BLE001, S110'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      logging the failure must not mask the original user exception; silent
-      swallow is intentional — the user's exception is re-raised on the next
-      line
+    why: 'logging the failure must not mask the user exception re-raised below'
 
   - location: ./packages/omniray/omniray/tracing/tracers.py:368
     token: '# noqa'
     content: 'from opentelemetry import context as context_api  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      opentelemetry is an optional dependency; lazy import inside otel-only
-      branch keeps module import-time graceful when extras not installed
+    why: 'otel is an optional extra; lazy import inside the otel-only branch'
 
   - location: ./packages/omniray/omniray/tracing/tracers.py:369
     token: '# noqa'
     content: 'from opentelemetry import trace as trace_api  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      opentelemetry is an optional dependency; lazy import inside otel-only
-      branch keeps module import-time graceful when extras not installed
+    why: 'otel is an optional extra; lazy import inside the otel-only branch'
 
   - location: ./packages/omniray/omniray/tracing/tracers.py:372
     token: '# type: ignore'
@@ -511,9 +479,7 @@ entries:
     content: 'from opentelemetry import context as context_api  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      opentelemetry is an optional dependency; lazy import inside otel-only
-      branch keeps module import-time graceful when extras not installed
+    why: 'otel is an optional extra; lazy import inside the otel-only branch'
 
   - location: ./packages/omniray/omniray/tracing/tracers.py:384
     token: '# type: ignore'
@@ -540,8 +506,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      test must import logger AFTER setup_console_handler runs so the assertion
-      observes the post-setup handler list, not module-load state
+      logger imported after setup_console_handler() so handler list reflects
+      post-setup state
 
   - location: ./packages/omniray/tests/unit/tracing/test_console.py:26
     token: '# noqa'
@@ -549,17 +515,15 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      test must import logger AFTER setup_console_handler runs so the assertion
-      observes the post-setup handler list, not module-load state
+      logger imported after setup_console_handler() so handler list reflects
+      post-setup state
 
   - location: ./packages/omniray/tests/unit/tracing/test_console.py:33
     token: '# noqa'
     content: 'import importlib  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      importlib imported inside test so reload happens AFTER mocker.patch() of
-      CONSOLE_LOG_FLAG; module-level import would resolve flag before patch
+    why: 'importlib kept local; only used here for the reload() call below'
 
   - location: ./packages/omniray/tests/unit/tracing/test_console.py:37
     token: '# noqa'
@@ -567,9 +531,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      module imported inside test so importlib.reload() observes the patched
-      CONSOLE_LOG_FLAG; module-level import would prime cache with unpatched
-      value
+      module imported inside test so fresh load happens after CONSOLE_LOG_FLAG
+      patch
 
   - location: ./packages/omniray/tests/unit/tracing/test_thresholds.py:42
     token: '# type: ignore'
@@ -641,9 +604,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      _omniwrap_skip is the documented sentinel attribute that wrap_all()
-      checks; canonical marker name owned by omniwrap, module-private not
-      type-private
+      _omniwrap_skip: documented sentinel attribute that wrap_all() honors;
+      module-private not type-private
 
   - location: ./packages/omniwrap/omniwrap/markers.py:19
     token: '# type: ignore'
@@ -678,309 +640,217 @@ entries:
     content: 'from myapp.service import UserService  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() so wrapping applies;
-      module-level import would resolve before fixture creates the module
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_class_wrapping.py:83
     token: '# noqa'
     content: 'from myapp.service import UserService  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_class_wrapping.py:102
     token: '# noqa'
     content: 'from myapp.service import UserService  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_class_wrapping.py:120
     token: '# noqa'
     content: 'from myapp.service import UserService  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_class_wrapping.py:139
     token: '# noqa'
     content: 'from myapp.service import UserService  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_class_wrapping.py:161
     token: '# noqa'
     content: 'from myapp.service import Calculator, greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_class_wrapping.py:189
     token: '# noqa'
     content: 'from myapp.service import UserService  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_class_wrapping.py:190
     token: '# noqa'
     content: 'from myapp.utils import Calculator, greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_decorator_interactions.py:200
     token: '# noqa'
     content: 'from myapp.service import expensive, regular  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_decorator_interactions.py:216
     token: '# noqa'
     content: 'from myapp.service import Service  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_decorator_interactions.py:237
     token: '# noqa'
     content: 'from myapp.service import decorated, plain  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_decorator_interactions.py:253
     token: '# noqa'
     content: 'from myapp.service import decorated, plain  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_decorator_interactions.py:272
     token: '# noqa'
     content: 'from myapp.service import User  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_decorator_interactions.py:303
     token: '# noqa'
     content: 'from myapp.service import Config  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_decorator_interactions.py:325
     token: '# noqa'
     content: 'from myapp.service import ConcreteService  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_decorator_interactions.py:345
     token: '# noqa'
     content: 'from myapp.service import plain, stacked_no_wraps, stacked_with_wraps  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_decorator_interactions.py:368
     token: '# noqa'
     content: 'from myapp.service import decorated_fetch, plain_fetch  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_decorator_interactions.py:387
     token: '# noqa'
     content: 'from myapp.service import Service  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_full_pipeline.py:20
     token: '# noqa'
     content: 'from myapp.service import greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_full_pipeline.py:44
     token: '# noqa'
     content: 'from myapp.service import fetch  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_full_pipeline.py:63
     token: '# noqa'
     content: 'from myapp.service import greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_full_pipeline.py:64
     token: '# noqa'
     content: 'from myapp.utils import helper  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_full_pipeline.py:90
     token: '# noqa'
     content: 'from myapp.service import greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_full_pipeline.py:91
     token: '# noqa'
     content: 'from myapp.utils import fetch  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_idempotency.py:36
     token: '# noqa'
     content: 'from myapp.service import greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_idempotency.py:53
     token: '# noqa'
     content: 'from myapp.service import fetch  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_idempotency.py:69
     token: '# noqa'
     content: 'from myapp.service import greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_idempotency.py:94
     token: '# noqa'
     content: 'from myapp.service import greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_idempotency.py:120
     token: '# noqa'
     content: 'from myapp.service import Service  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_idempotency.py:136
     token: '# noqa'
     content: 'from myapp.service import Service as Svc2  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_import_filtering.py:36
     token: '# noqa'
     content: 'from myapp.service import join, my_func  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_import_filtering.py:43
     token: '# noqa'
@@ -997,120 +867,84 @@ entries:
     content: 'from myapp.service import process  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_import_filtering.py:65
     token: '# noqa'
     content: 'from myapp.service import basename, transform  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_import_filtering.py:91
     token: '# noqa'
     content: 'from myapp.service import helper as imported_helper  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_import_filtering.py:92
     token: '# noqa'
     content: 'from myapp.service import process  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_import_filtering.py:93
     token: '# noqa'
     content: 'from myapp.utils import helper  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_multiple_wrappers.py:34
     token: '# noqa'
     content: 'from myapp.service import greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_multiple_wrappers.py:65
     token: '# noqa'
     content: 'from myapp.service import fetch  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_multiple_wrappers.py:83
     token: '# noqa'
     content: 'from myapp.service import fetch, greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_multiple_wrappers.py:149
     token: '# noqa'
     content: 'from myapp.service import fetch  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_multiple_wrappers.py:153
     token: '# noqa'
     content: 'from myapp.service import greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_multiple_wrappers.py:172
     token: '# noqa'
     content: 'from myapp.service import greet  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_rules.py:71
     token: '# noqa'
     content: 'from myapp.service import Service, ServiceError  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_rules.py:75
     token: '# noqa'
@@ -1118,19 +952,15 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      throwaway exception raised inside try block to verify wrap_all leaves
-      exception classes alone; production-style exception design (EM101/TRY003)
-      doesn't apply to a one-line test fixture
+      throwaway test exception inside try/except; production exception style
+      doesn't apply
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_rules.py:90
     token: '# noqa'
     content: 'from myapp.service import Service  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_rules.py:94
     token: '# noqa'
@@ -1138,19 +968,15 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      throwaway exception raised inside try block to verify wrap_all leaves
-      exception classes alone; production-style exception design (EM101/TRY003)
-      doesn't apply to a one-line test fixture
+      throwaway test exception inside try/except; production exception style
+      doesn't apply
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_rules.py:109
     token: '# noqa'
     content: 'from myapp.service import FatalError, Service  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_rules.py:112
     token: '# noqa'
@@ -1158,39 +984,29 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      throwaway exception raised inside try block to verify wrap_all leaves
-      exception classes alone; production-style exception design (EM101/TRY003)
-      doesn't apply to a one-line test fixture
+      throwaway test exception inside try/except; production exception style
+      doesn't apply
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_rules.py:126
     token: '# noqa'
     content: 'from myapp.service import Service  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_rules.py:158
     token: '# noqa'
     content: 'from myapp.service import TimeoutError as SvcTimeout  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_rules.py:159
     token: '# noqa'
     content: 'from myapp.service import fetch, validate  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_rules.py:163
     token: '# noqa'
@@ -1198,109 +1014,78 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      throwaway exception raised inside try block to verify wrap_all leaves
-      exception classes alone; production-style exception design (EM101/TRY003)
-      doesn't apply to a one-line test fixture
+      throwaway test exception inside try/except; production exception style
+      doesn't apply
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_wrap_config.py:46
     token: '# noqa'
     content: 'from myapp.service import Conversation, Message  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_wrap_config.py:76
     token: '# noqa'
     content: 'from myapp.service import Model  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_wrap_config.py:96
     token: '# noqa'
     content: 'from myapp.service import Conversation  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_wrap_config.py:147
     token: '# noqa'
     content: 'from myapp.service import Service  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_wrap_config.py:173
     token: '# noqa'
     content: 'from myapp.service import healthcheck, process  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_wrap_marker.py:83
     token: '# noqa'
     content: 'from myapp.service import healthcheck, process  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_wrap_marker.py:103
     token: '# noqa'
     content: 'from myapp.service import fetch, healthcheck  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_wrap_marker.py:118
     token: '# noqa'
     content: 'from myapp.service import Service  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_wrap_marker.py:135
     token: '# noqa'
     content: 'from myapp.service import Internal, Public  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_wrap_marker.py:150
     token: '# noqa'
     content: 'from myapp.service import Service, ServiceError, healthcheck  # noqa: PLC0415'
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
-    why: >-
-      test imports target module AFTER wrap_all() runs against the
-      fixture-created module; module-level import would resolve before wrapping
-      is applied
+    why: 'module imported after fixture builds it and wrap_all() runs'
 
   - location: ./packages/omniwrap/tests/e2e/test_skip_wrap_marker.py:154
     token: '# noqa'
@@ -1308,9 +1093,8 @@ entries:
     created_at: 2026-05-17
     owner: Bartłomiej Flis <97804977+BKDDFS@users.noreply.github.com>
     why: >-
-      throwaway exception raised inside try block to verify wrap_all leaves
-      exception classes alone; production-style exception design (EM101/TRY003)
-      doesn't apply to a one-line test fixture
+      throwaway test exception inside try/except; production exception style
+      doesn't apply
 
   - location: ./packages/omniwrap/tests/unit/test_performance.py:15
     token: '# noqa'
