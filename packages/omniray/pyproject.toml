@@ -52,7 +52,7 @@ otel = ["opentelemetry-api>=1.16", "opentelemetry-sdk>=1.16"]
 dev = [
     "opentelemetry-api>=1.16",
     "opentelemetry-sdk>=1.16",
-    "pytest>=8.0",
+    "pytest>=9.0.3",
     "pytest-mock>=3.14",
     "pytest-asyncio>=0.25",
     "pytest-cov>=6.0",

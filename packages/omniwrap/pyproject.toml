@@ -38,7 +38,7 @@ authors = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "pytest-mock>=3.14", "pytest-cov>=6.0"]
+dev = ["pytest>=9.0.3", "pytest-mock>=3.14", "pytest-cov>=6.0"]
 
 [project.urls]
 Homepage = "https://github.com/omniviser/omniray"
