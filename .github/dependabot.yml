@@ -26,3 +26,10 @@ updates:
       - "ci"
     commit-message:
       prefix: "ci"
+    groups:
+      # init/analyze must always move together — CodeQL fails with
+      # "Loaded a configuration file for version X, but running version Y"
+      # when the steps end up on different versions.
+      codeql-action:
+        patterns:
+          - "github/codeql-action*"
